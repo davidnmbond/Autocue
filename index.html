@@ -60,6 +60,8 @@
 			height: 100vh; /* Ensure it takes up the full viewport height */
 			box-sizing: border-box; /* Include padding in height calculation */
 			padding-bottom: 1em; /* Add padding to avoid text touching the bottom */
+			margin: 0 auto; /* Center the presenter horizontally */
+			width: 100%; /* Default width, adjustable via dropdown */
 		}
 		body.dark #presenter {
 			scrollbar-color: #555 #222; /* Dark scrollbar with lighter thumb */
@@ -179,15 +181,18 @@
 			color: #00aaff; /* Light blue */
 			font-weight: bold;
 			text-align: center; /* Center the heading */
-			display: inline-block; /* Ensure it stays on the same line */
+			display: block; /* Ensure the heading spans the full width */
 			margin: 1em 0; /* Add spacing around the heading */
 			white-space: nowrap; /* Prevent line breaks within the heading */
-	}
+		}
 
 		#toolbar span {
 			color: var(--text-color); /* Ensure toolbar text contrasts with the background */
 			font-size: 0.9em;
 			margin-left: 5px;
+		}
+		body.presentation {
+			background-color: black; /* Ensure the entire viewport has a black background */
 		}
 	</style>
 </head>
@@ -214,6 +219,11 @@
 				<option value="5" selected>5 Words</option>
 				<option value="7">7 Words</option>
 				<option value="10">10 Words</option>
+			</select>
+			<select id="presenterWidth">
+				<option value="100%" selected>100%</option>
+				<option value="80%">80%</option>
+				<option value="50%">50%</option>
 			</select>
 			 <label class="toggle-switch">
 				<input type="checkbox" id="dictationToggle">
@@ -244,6 +254,7 @@
 	const voiceStatus = document.getElementById('voiceStatus');
 	const scrollSmoothness = document.getElementById('scrollSmoothness');
 	const wordSeekRange = document.getElementById('wordSeekRange');
+	const presenterWidth = document.getElementById('presenterWidth');
 	const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 	let editorCursorPosition = 0; // Variable to store the cursor position in the editor
@@ -284,6 +295,13 @@
 	// Save the word seek range to localStorage
 	wordSeekRange.addEventListener('change', () => {
 		localStorage.setItem('wordSeekRange', wordSeekRange.value);
+	});
+
+	// Update presenter width on change
+	presenterWidth.addEventListener('change', () => {
+		const selectedWidth = presenterWidth.value;
+		localStorage.setItem('presenterWidth', selectedWidth); // Save to localStorage
+		presenter.style.width = selectedWidth; // Apply the width to the presenter
 	});
 
 	// Save content to local storage whenever the editor's content changes
@@ -494,7 +512,7 @@
 	}
 
 	function enterPresenter() {
-		// Force dark mode in presentation mode
+		// Force dark mode and black background in presentation mode
 		document.body.classList.add('dark', 'presentation');
 		document.getElementById('toolbar').style.display = 'none';
 		editor.style.display = 'none';
@@ -536,72 +554,89 @@
 		renderPresenter();
 	}
 
+	function exitPresenter() {
+		// Restore user's dark mode preference in edit mode
+		document.body.classList.remove('presentation');
+		if (!prefersDark) {
+			document.body.classList.remove('dark');
+		}
+
+		document.getElementById('toolbar').style.display = 'flex';
+		editor.style.display = 'block';
+		presenter.style.display = 'none';
+
+		// Reset the VU meter position
+		const vuMeterContainer = document.getElementById('vuMeterContainer');
+		vuMeterContainer.style.display = vuMeterToggle.checked ? 'block' : 'none';
+		vuMeterContainer.style.position = 'relative';
+	}
+
 	// Render the presenter content
 	function renderPresenter() {
 		let html = '';
 		let isHeading = false;
-
+	
 		words.forEach((w, i) => {
-				if (w.isHeading) {
-						// Start a new heading block if it's a heading
-						if (!isHeading) {
-								html += `<span class="heading">`;
-								isHeading = true;
-						}
-						html += `${w.word} `; // Add the word to the heading block
-				} else {
-						// Close the heading block if it ends
-						if (isHeading) {
-								html += `</span>`;
-								isHeading = false;
-						}
-
-						// Render regular words
-						if (w.word === '\n') {
-								html += '<br>'; // Line break
-						} else if (i < cursor) {
-								html += `<span class="greyed-out">${w.word}</span> `;
-						} else if (i === cursor) {
-								html += `<span class="active-word">${w.word}</span> `;
-						} else {
-								html += `<span>${w.word}</span> `;
-						}
+			if (w.isHeading) {
+				// Start a new heading block if it's a heading
+				if (!isHeading) {
+					html += `<span class="heading">`;
+					isHeading = true;
 				}
+				html += `${w.word.replace('#', '').trim()} `; // Strip the # symbol and add the word to the heading block
+			} else {
+				// Close the heading block if it ends
+				if (isHeading) {
+					html += `</span>`;
+					isHeading = false;
+				}
+	
+				// Render regular words
+				if (w.word === '\n') {
+					html += '<br>'; // Line break
+				} else if (i < cursor) {
+					html += `<span class="greyed-out">${w.word}</span> `;
+				} else if (i === cursor) {
+					html += `<span class="active-word">${w.word}</span> `;
+				} else {
+					html += `<span>${w.word}</span> `;
+				}
+			}
 		});
-
+	
 		// Close any open heading block
 		if (isHeading) {
-				html += `</span>`;
+			html += `</span>`;
 		}
-
+	
 		presenter.innerHTML = html;
-
+	
 		// Scroll the active word into the vertical center of the screen
 		const activeWordElement = presenter.querySelector('.active-word');
 		if (activeWordElement) {
-				const smoothness = scrollSmoothness.value; // Get the selected smoothness value
-
-				// Check if the cursor is on the last line before a heading
-				const nextHeadingIndex = words.findIndex((w, index) => index > cursor && w.isHeading);
-				if (nextHeadingIndex !== -1) {
-						const isLastLineBeforeHeading = words[cursor]?.line === words[nextHeadingIndex]?.line - 1;
-						if (isLastLineBeforeHeading) {
-								// Scroll the last line to the top of the screen
-								activeWordElement.scrollIntoView({
-										behavior: smoothness === 'instant' ? 'auto' : 'smooth',
-										block: 'start', // Align the last line to the top of the screen
-								});
-								return; // Exit early to avoid centering the active word
-						}
-				}
-
-				// Default behavior: center the active word vertically
-				activeWordElement.scrollIntoView({
+			const smoothness = scrollSmoothness.value; // Get the selected smoothness value
+	
+			// Check if the cursor is on the last line before a heading
+			const nextHeadingIndex = words.findIndex((w, index) => index > cursor && w.isHeading);
+			if (nextHeadingIndex !== -1) {
+				const isLastLineBeforeHeading = words[cursor]?.line === words[nextHeadingIndex]?.line - 1;
+				if (isLastLineBeforeHeading) {
+					// Scroll the last line to the top of the screen
+					activeWordElement.scrollIntoView({
 						behavior: smoothness === 'instant' ? 'auto' : 'smooth',
-						block: 'center', // Center the active word vertically
-				});
+						block: 'start', // Align the last line to the top of the screen
+					});
+					return; // Exit early to avoid centering the active word
+				}
+			}
+	
+			// Default behavior: center the active word vertically
+			activeWordElement.scrollIntoView({
+				behavior: smoothness === 'instant' ? 'auto' : 'smooth',
+				block: 'center', // Center the active word vertically
+			});
 		}
-}
+	}
 
 	// Handle speech recognition
 	try {
@@ -845,6 +880,15 @@
 		if (savedVuMeterEnabled !== null) {
 				vuMeterToggle.checked = savedVuMeterEnabled === 'true';
 				toggleVuMeter(vuMeterToggle.checked);
+		}
+
+		// Load presenter width preference
+		const savedPresenterWidth = localStorage.getItem('presenterWidth');
+		if (savedPresenterWidth) {
+				presenterWidth.value = savedPresenterWidth; // Set the dropdown value
+				presenter.style.width = savedPresenterWidth; // Apply the width to the presenter
+		} else {
+				presenter.style.width = '100%'; // Default to 100% if no value is saved
 		}
 	});
 
