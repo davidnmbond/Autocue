@@ -95,9 +95,12 @@
 			width: 100%;
 			height: 10px;
 			background: linear-gradient(to right, green, yellow, red); /* Gradient background */
-			position: relative;
-			margin-bottom: 5px;
+			position: fixed; /* Pin it to the screen */
+			top: 40px; /* Place it directly below the toolbar */
+			left: 0;
+			z-index: 999; /* Ensure it stays above other elements but below the toolbar */
 			overflow: hidden; /* Ensure the overlay stays within bounds */
+			display: block; /* Default display */
 		}
 
 		#vuMeter {
@@ -107,6 +110,14 @@
 			transition: width 0.05s ease-in-out; /* Smooth shrinking */
 			position: absolute;
 			right: 0; /* Start from the right */
+		}
+
+		#vuMeterContainer.hidden {
+			display: none; /* Hide the VU meter when toggled off */
+		}
+
+		body.presentation #vuMeterContainer {
+			top: 0; /* Pin it to the very top in presentation mode */
 		}
 
 		/* Toggle switch styling */
@@ -171,6 +182,12 @@
 			display: block; /* Ensure it spans the full width */
 			margin: 1em 0; /* Add spacing around the heading */
 		}
+
+		#toolbar span {
+			color: var(--text-color); /* Ensure toolbar text contrasts with the background */
+			font-size: 0.9em;
+			margin-left: 5px;
+		}
 	</style>
 </head>
 <body>
@@ -190,11 +207,22 @@
 				<option value="ultra-smooth">Ultra Smooth</option>
 				<option value="glide">Glide</option>
 			</select>
+			<select id="wordSeekRange">
+				<option value="3">3 Words</option>
+				<option value="5" selected>5 Words</option>
+				<option value="7">7 Words</option>
+				<option value="10">10 Words</option>
+			</select>
 			 <label class="toggle-switch">
 				<input type="checkbox" id="dictationToggle">
 				<span class="slider"></span>
 			</label>
 			<span id="voiceStatus"></span>
+			<label class="toggle-switch">
+				<input type="checkbox" id="vuMeterToggle" checked>
+				<span class="slider"></span>
+			</label>
+			<span>VU Meter</span>
 		</div>
 		<button onclick="enterPresenter()">Present</button>
 	</div>
@@ -212,6 +240,7 @@
 	const fontSize = document.getElementById('fontSize');
 	const voiceStatus = document.getElementById('voiceStatus');
 	const scrollSmoothness = document.getElementById('scrollSmoothness');
+	const wordSeekRange = document.getElementById('wordSeekRange');
 	const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 	// Respect user's dark mode preference in edit mode
@@ -251,6 +280,11 @@
 		localStorage.setItem('voiceRecognition', isDictationEnabled);
 	});
 
+	// Save the word seek range to localStorage
+	wordSeekRange.addEventListener('change', () => {
+		localStorage.setItem('wordSeekRange', wordSeekRange.value);
+	});
+
 	// Load content from local storage when the page loads
 	if (localStorage.getItem('autocueText')) {
 		editor.value = localStorage.getItem('autocueText');
@@ -286,6 +320,34 @@
 			stopDictation();
 		}
 	});
+
+	const vuMeterToggle = document.getElementById('vuMeterToggle');
+
+	// Save the VU meter preference to localStorage
+	vuMeterToggle.addEventListener('change', () => {
+		const isVuMeterEnabled = vuMeterToggle.checked;
+		localStorage.setItem('vuMeterEnabled', isVuMeterEnabled);
+		toggleVuMeter(isVuMeterEnabled);
+	});
+
+	// Load the VU meter preference on page load
+	window.addEventListener('DOMContentLoaded', () => {
+		const savedVuMeterEnabled = localStorage.getItem('vuMeterEnabled');
+		if (savedVuMeterEnabled !== null) {
+			vuMeterToggle.checked = savedVuMeterEnabled === 'true';
+			toggleVuMeter(vuMeterToggle.checked);
+		}
+	});
+
+	// Function to toggle the VU meter visibility
+	function toggleVuMeter(isEnabled) {
+		const vuMeterContainer = document.getElementById('vuMeterContainer');
+		if (isEnabled) {
+			vuMeterContainer.classList.remove('hidden');
+		} else {
+			vuMeterContainer.classList.add('hidden');
+		}
+	}
 
 	let recognition = null;
 	let audioContext = null;
@@ -451,11 +513,20 @@
 	}
 
 	function enterPresenter() {
-		// Force dark mode in presenter mode
-		document.body.classList.add('dark');
+		// Force dark mode in presentation mode
+		document.body.classList.add('dark', 'presentation');
 		document.getElementById('toolbar').style.display = 'none';
 		editor.style.display = 'none';
 		presenter.style.display = 'block';
+
+		// Show the VU meter at the top if enabled
+		const vuMeterContainer = document.getElementById('vuMeterContainer');
+		if (vuMeterToggle.checked) {
+			vuMeterContainer.style.display = 'block';
+			vuMeterContainer.style.position = 'fixed';
+		} else {
+			vuMeterContainer.style.display = 'none';
+		}
 
 		// Scale font size for presentation mode
 		const selectedFontSize = parseInt(fontSize.value, 10); // Parse font size as a number
@@ -539,7 +610,10 @@
 						let bestMatch = null;
 						let bestMatchOffset = null;
 
-						for (let offset = 1; offset <= 5; offset++) {
+						// Get the range from the dropdown
+						const seekRange = parseInt(wordSeekRange.value, 5);
+
+						for (let offset = 1; offset <= seekRange; offset++) {
 							// Look ahead
 							if (cursor + offset < words.length && spokenWord === words[cursor + offset].word.toLowerCase()) {
 								const forwardWeight = 1 / offset; // Weight decreases with distance
@@ -647,12 +721,19 @@
 
 		function exitPresenter() {
 			// Restore user's dark mode preference in edit mode
+			document.body.classList.remove('presentation');
 			if (!prefersDark) {
 				document.body.classList.remove('dark');
 			}
 			document.getElementById('toolbar').style.display = 'flex';
 			editor.style.display = 'block';
 			presenter.style.display = 'none';
+
+			// Reset the VU meter position
+			const vuMeterContainer = document.getElementById('vuMeterContainer');
+			vuMeterContainer.style.display = vuMeterToggle.checked ? 'block' : 'none';
+			vuMeterContainer.style.position = 'relative';
+
 			document.removeEventListener('keydown', presenterKeyHandler); // Remove presenter-specific key bindings
 			if (recognition) recognition.stop(); // Stop speech recognition
 			recognition = null;
@@ -676,6 +757,23 @@
 		// Exit presentation mode with Esc
 		if (event.key === 'Escape' && presenter.style.display !== 'none') {
 			exitPresenter();
+		}
+	});
+
+	// Add key bindings for toggling between modes
+	document.addEventListener('keydown', (event) => {
+		// Toggle between edit and presentation mode with Escape
+		if (event.key === 'Escape') {
+			if (presenter.style.display === 'none') {
+				enterPresenter(); // Switch to presentation mode
+			} else {
+				exitPresenter(); // Switch to edit mode
+			}
+		}
+
+		// Enter presentation mode with Ctrl+Enter
+		if (event.ctrlKey && event.key === 'Enter') {
+			enterPresenter();
 		}
 	});
 
@@ -722,6 +820,12 @@
 		if (savedCursorPosition !== null) {
 			editorCursorPosition = parseInt(savedCursorPosition, 10);
 			editor.setSelectionRange(editorCursorPosition, editorCursorPosition); // Restore cursor position
+		}
+
+		// Load the word seek range from localStorage
+		const savedWordSeekRange = localStorage.getItem('wordSeekRange');
+		if (savedWordSeekRange) {
+			wordSeekRange.value = savedWordSeekRange;
 		}
 	});
 	</script>
