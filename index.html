@@ -267,6 +267,13 @@
 	let cursor = 0; // Global cursor variable
 	let words = []; // Global words array
 
+	function getAudioContext() {
+		if (!audioContext) {
+			audioContext = new AudioContext();
+		}
+		return audioContext;
+	}
+
 	// Respect user's dark mode preference in edit mode
 	if (prefersDark) {
 		document.body.classList.add('dark');
@@ -384,6 +391,15 @@
 		if (recognition) {
 			recognition.stop();
 			recognition = null;
+		}
+
+		const context = getAudioContext();
+		if (context.state === 'suspended') {
+			context.resume().then(() => {
+				console.log('AudioContext resumed for dictation.');
+			}).catch((err) => {
+				console.error('Error resuming AudioContext:', err);
+			});
 		}
 
 		recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
@@ -531,6 +547,21 @@
 			vuMeterContainer.style.display = 'block';
 			vuMeterContainer.style.position = 'fixed';
 			vuMeterContainer.style.top = '0'; // Pin to the top in presenter mode
+
+			// Resume AudioContext and start the VU Meter
+			if (!audioContext) {
+				audioContext = new AudioContext();
+			}
+			if (audioContext.state === 'suspended') {
+				audioContext.resume().then(() => {
+					console.log('AudioContext resumed successfully.');
+					startVuMeter();
+				}).catch((err) => {
+					console.error('Error resuming AudioContext:', err);
+				});
+			} else {
+				startVuMeter();
+			}
 		}
 
 		// Scale font size for presentation mode
@@ -573,14 +604,21 @@
 
 		// Reset the VU meter position
 		const vuMeterContainer = document.getElementById('vuMeterContainer');
-		vuMeterContainer.style.display = vuMeterToggle.checked ? 'block' : 'none';
-		vuMeterContainer.style.position = 'fixed';
-		vuMeterContainer.style.top = '40px'; // Reset to below the toolbar in edit mode
+		if (vuMeterToggle.checked) {
+			vuMeterContainer.style.display = 'block';
+			vuMeterContainer.style.position = 'fixed';
+			vuMeterContainer.style.top = '40px'; // Reset to below the toolbar in edit mode
+		} else {
+			// Stop the VU Meter if it's disabled
+			stopVuMeter();
+			vuMeterContainer.style.display = 'none';
+		}
 
-		
-
-		if (recognition) recognition.stop(); // Stop speech recognition
-		recognition = null;
+		// Stop speech recognition if active
+		if (recognition) {
+			recognition.stop();
+			recognition = null;
+		}
 
 		// Synchronize the editor's cursor position with the presenter's cursor
 		let charCount = 0;
@@ -748,12 +786,21 @@
 
 		// Reset the VU meter position
 		const vuMeterContainer = document.getElementById('vuMeterContainer');
-		vuMeterContainer.style.display = vuMeterToggle.checked ? 'block' : 'none';
-		vuMeterContainer.style.position = 'fixed';
-		vuMeterContainer.style.top = '40px'; // Reset to below the toolbar in edit mode
+		if (vuMeterToggle.checked) {
+			vuMeterContainer.style.display = 'block';
+			vuMeterContainer.style.position = 'fixed';
+			vuMeterContainer.style.top = '40px'; // Reset to below the toolbar in edit mode
+		} else {
+			// Stop the VU Meter if it's disabled
+			stopVuMeter();
+			vuMeterContainer.style.display = 'none';
+		}
 
-		if (recognition) recognition.stop(); // Stop speech recognition
-		recognition = null;
+		// Stop speech recognition if active
+		if (recognition) {
+			recognition.stop();
+			recognition = null;
+		}
 
 		// Synchronize the editor's cursor position with the presenter's cursor
 		let charCount = 0;
@@ -924,10 +971,19 @@
 	let vuMeterAnimationFrameId = null;
 
 	function startVuMeter() {
+		const context = getAudioContext();
+
+		if (context.state === 'suspended') {
+			context.resume().then(() => {
+				console.log('AudioContext resumed for VU Meter.');
+			}).catch((err) => {
+				console.error('Error resuming AudioContext:', err);
+			});
+		}
+
 		navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-			audioContext = audioContext || new AudioContext();
-			analyser = audioContext.createAnalyser();
-			microphone = audioContext.createMediaStreamSource(stream);
+			analyser = context.createAnalyser();
+			microphone = context.createMediaStreamSource(stream);
 
 			analyser.fftSize = 256;
 			microphone.connect(analyser);
@@ -960,9 +1016,12 @@
 			vuMeterAnimationFrameId = null;
 		}
 
-		if (audioContext) {
-			audioContext.close();
-			audioContext = null;
+		if (audioContext && audioContext.state !== 'suspended') {
+			audioContext.suspend().then(() => {
+				console.log('AudioContext suspended for VU Meter.');
+			}).catch((err) => {
+				console.error('Error suspending AudioContext:', err);
+			});
 		}
 
 		if (microphone && microphone.mediaStream) {
