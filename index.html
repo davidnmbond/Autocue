@@ -125,6 +125,15 @@
 		input:checked + .slider:before {
 			transform: translateX(14px);
 		}
+
+		.greyed-out {
+			color: grey;
+			opacity: 0.5;
+		}
+
+		.active-word {
+			color: #aaffaa; /* Slightly greener color for the active word */
+		}
 	</style>
 </head>
 <body>
@@ -397,85 +406,155 @@
 		vuMeter.style.width = '0%'; // Reset the VU meter
 	}
 
-		let current = 0;
-		let paragraphs = [];
-		let ps = [];
+	function enterPresenter() {
+		// Force dark mode in presenter mode
+		document.body.classList.add('dark');
+		document.getElementById('toolbar').style.display = 'none';
+		editor.style.display = 'none';
+		presenter.style.display = 'block';
 
-		function enterPresenter() {
-			// Force dark mode in presenter mode
-			document.body.classList.add('dark');
-			document.getElementById('toolbar').style.display = 'none';
-			editor.style.display = 'none';
-			presenter.style.display = 'block';
+		// Scale font size for presentation mode
+		const selectedFontSize = parseInt(fontSize.value, 10); // Parse font size as a number
+		presenter.style.fontSize = `${selectedFontSize * 1.5}px`; // Scale font size for presentation mode
 
-			// Scale font size for presentation mode
-			const selectedFontSize = parseInt(fontSize.value, 10); // Parse font size as a number
-			presenter.style.fontSize = `${selectedFontSize * 1.5}px`; // Scale font size for presentation mode
+		// Split text into words and lines
+		const paragraphs = editor.value.split(/\n\n+/);
+		const words = paragraphs.flatMap((p, i) => {
+			const lineWords = p.split(/\s+/).map(word => ({ word, line: i }));
+			lineWords.push({ word: '\n', line: i }); // Add a line break marker
+			return lineWords;
+		});
 
-			paragraphs = editor.value.split(/\n\n+/);
-			current = 0;
-			presenter.innerHTML = paragraphs.map(p => `<p>${p}</p>`).join('');
-			ps = presenter.querySelectorAll('p');
+		let cursor = 0; // Virtual cursor to track the current word
 
-			function updateDisplay() {
-				const smoothness = scrollSmoothness.value;
+		// Render the presenter content
+		function renderPresenter() {
+			let html = '';
+			words.forEach((w, i) => {
+				if (w.word === '\n') {
+					html += '<br>'; // Line break
+				} else if (i < cursor) {
+					html += `<span class="greyed-out">${w.word}</span> `;
+				} else if (i === cursor) {
+					html += `<span class="active-word">${w.word}</span> `;
+				} else {
+					html += `<span>${w.word}</span> `;
+				}
+			});
+			presenter.innerHTML = html;
 
-				ps.forEach((p, i) => p.classList.toggle('dim', i < current));
-				ps[current]?.scrollIntoView({
-					behavior: smoothness === 'instant' ? 'auto' : 'smooth',
-					block: 'center',
+			// Scroll the active word into the vertical center of the screen
+			const activeWordElement = presenter.querySelector('.active-word');
+			if (activeWordElement) {
+				const smoothness = scrollSmoothness.value; // Get the selected smoothness value
+				activeWordElement.scrollIntoView({
+					behavior: smoothness === 'instant' ? 'auto' : 'smooth', // Use 'auto' for instant scrolling
+					block: 'center', // Center the active word vertically
 				});
-
-				// Adjust timing for custom smoothness levels
-				if (smoothness === 'very-smooth') {
-					presenter.style.scrollBehavior = 'smooth';
-					setTimeout(() => (presenter.style.scrollBehavior = 'auto'), 1500); // 3x longer
-				} else if (smoothness === 'ultra-smooth') {
-					presenter.style.scrollBehavior = 'smooth';
-					setTimeout(() => (presenter.style.scrollBehavior = 'auto'), 3000); // 3x longer
-				} else if (smoothness === 'glide') {
-					presenter.style.scrollBehavior = 'smooth';
-					setTimeout(() => (presenter.style.scrollBehavior = 'auto'), 9000); // 3x longer
-				}
-			}
-
-			updateDisplay();
-
-			document.addEventListener('keydown', presenterKeyHandler);
-
-			try {
-				recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-				recognition.continuous = true;
-				recognition.interimResults = true;
-				recognition.onresult = (e) => {
-					const transcript = e.results[e.results.length - 1][0].transcript.toLowerCase();
-					const target = ps[current]?.innerText.toLowerCase();
-					if (transcript.length > 20 && target && transcript.includes(target.substring(0, Math.min(target.length, 30)))) {
-						if (current < paragraphs.length - 1) current++;
-						updateDisplay();
-					}
-				};
-				recognition.start();
-			} catch(e) {
-				console.warn('Speech recognition not supported or blocked:', e);
-			}
-
-			function presenterKeyHandler(e) {
-				if (e.key === ' ' || e.key === 'ArrowDown') {
-					if (current < paragraphs.length - 1) current++;
-					e.preventDefault();
-				} else if (e.key === 'ArrowUp') {
-					if (current > 0) current--;
-					e.preventDefault();
-				} else if (e.key === 'Home') {
-					current = 0;
-					e.preventDefault();
-				} else if (e.key === 'Escape') {
-					exitPresenter();
-				}
-				updateDisplay();
 			}
 		}
+
+		renderPresenter();
+
+		// Handle speech recognition
+		try {
+			recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+			recognition.continuous = true;
+			recognition.interimResults = true;
+
+			recognition.onresult = (e) => {
+				const transcript = e.results[e.results.length - 1][0].transcript.toLowerCase();
+				const spokenWords = transcript.split(/\s+/);
+
+				for (const spokenWord of spokenWords) {
+					console.log(`Spoken word: "${spokenWord}"`); // Log the spoken word
+
+					// Check if the spoken word matches the current word
+					if (cursor < words.length && spokenWord === words[cursor].word.toLowerCase()) {
+						console.log(`Matched expected word: "${words[cursor].word}" at cursor ${cursor}`);
+						cursor++; // Move to the next word
+					} else {
+						// Look ahead or behind for a match
+						let found = false;
+						for (let offset = 1; offset <= 5; offset++) {
+							// Look ahead
+							if (cursor + offset < words.length && spokenWord === words[cursor + offset].word.toLowerCase()) {
+								console.log(
+									`Matched nearby word: "${words[cursor + offset].word}" at position ${cursor + offset} (lookahead)`
+								);
+								cursor += offset; // Skip ahead to the matching word
+								found = true;
+								break;
+							}
+							// Look behind
+							if (cursor - offset >= 0 && spokenWord === words[cursor - offset].word.toLowerCase()) {
+								console.log(
+									`Matched nearby word: "${words[cursor - offset].word}" at position ${cursor - offset} (lookbehind)`
+								);
+								cursor -= offset; // Move back to the matching word
+								found = true;
+								break;
+							}
+						}
+						if (!found) {
+							// If no match is found, log the unmatched word
+							console.warn(`Unmatched word: "${spokenWord}"`);
+						}
+					}
+
+					// Log the updated cursor position
+					console.log(`Cursor moved to position: ${cursor}`);
+				}
+
+				renderPresenter(); // Update the display
+			};
+
+			recognition.start();
+		} catch (e) {
+			console.warn('Speech recognition not supported or blocked:', e);
+		}
+
+		// Handle keyboard interruptions
+		function presenterKeyHandler(e) {
+			if (e.key === 'ArrowRight') {
+				// Move forward one word
+				if (cursor < words.length - 1) cursor++;
+			} else if (e.key === 'ArrowLeft') {
+				// Move back one word
+				if (cursor > 0) cursor--;
+			} else if (e.key === 'ArrowDown') {
+				// Move to the beginning of the next line
+				const currentLine = words[cursor]?.line;
+				const nextLineIndex = words.findIndex(w => w.line === currentLine + 1);
+				if (nextLineIndex !== -1) {
+					cursor = nextLineIndex;
+				} else {
+					// If no next line, move to the last word
+					cursor = words.length - 1;
+				}
+			} else if (e.key === 'ArrowUp') {
+				// Move to the beginning of the previous line
+				const currentLine = words[cursor]?.line;
+				const prevLineIndex = words.slice(0, cursor).reverse().findIndex(w => w.line === currentLine - 1);
+				if (prevLineIndex !== -1) {
+					cursor = words.length - prevLineIndex - 1;
+				} else {
+					// If no previous line, move to the first word
+					cursor = 0;
+				}
+			} else if (e.key === 'Home') {
+				// Move to the start
+				cursor = 0;
+			} else if (e.key === 'End') {
+				// Move to the end
+				cursor = words.length - 1;
+			}
+
+			// Update the display after moving the cursor
+			renderPresenter();
+		}
+
+		document.addEventListener('keydown', presenterKeyHandler);
 
 		function exitPresenter() {
 			// Restore user's dark mode preference in edit mode
@@ -489,13 +568,14 @@
 			if (recognition) recognition.stop();
 			recognition = null;
 		}
+	}
 
-		// Add Ctrl+Enter to trigger presentation mode
-		document.addEventListener('keydown', (event) => {
-			if (event.ctrlKey && event.key === 'Enter') {
-				enterPresenter();
-			}
-		});
+	// Add Ctrl+Enter to trigger presentation mode
+	document.addEventListener('keydown', (event) => {
+		if (event.ctrlKey && event.key === 'Enter') {
+			enterPresenter();
+		}
+	});
 
 	// Load preferences from localStorage
 	window.addEventListener('DOMContentLoaded', () => {
