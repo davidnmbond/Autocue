@@ -179,9 +179,10 @@
 			color: #00aaff; /* Light blue */
 			font-weight: bold;
 			text-align: center; /* Center the heading */
-			display: block; /* Ensure it spans the full width */
+			display: inline-block; /* Ensure it stays on the same line */
 			margin: 1em 0; /* Add spacing around the heading */
-		}
+			white-space: nowrap; /* Prevent line breaks within the heading */
+	}
 
 		#toolbar span {
 			color: var(--text-color); /* Ensure toolbar text contrasts with the background */
@@ -538,47 +539,69 @@
 	// Render the presenter content
 	function renderPresenter() {
 		let html = '';
+		let isHeading = false;
+
 		words.forEach((w, i) => {
-			if (w.isHeading) {
-				// Render the entire heading as a single block
-				html += `<span class="heading">${w.word.replace('#', '').trim()}</span> `;
-			} else if (w.word === '\n') {
-				html += '<br>'; // Line break
-			} else if (i < cursor) {
-			} else if (i === cursor) {
-				html += `<span class="active-word">${w.word}</span> `;
-			} else {
-				html += `<span>${w.word}</span> `;
-			}
+				if (w.isHeading) {
+						// Start a new heading block if it's a heading
+						if (!isHeading) {
+								html += `<span class="heading">`;
+								isHeading = true;
+						}
+						html += `${w.word} `; // Add the word to the heading block
+				} else {
+						// Close the heading block if it ends
+						if (isHeading) {
+								html += `</span>`;
+								isHeading = false;
+						}
+
+						// Render regular words
+						if (w.word === '\n') {
+								html += '<br>'; // Line break
+						} else if (i < cursor) {
+								html += `<span class="greyed-out">${w.word}</span> `;
+						} else if (i === cursor) {
+								html += `<span class="active-word">${w.word}</span> `;
+						} else {
+								html += `<span>${w.word}</span> `;
+						}
+				}
 		});
+
+		// Close any open heading block
+		if (isHeading) {
+				html += `</span>`;
+		}
+
 		presenter.innerHTML = html;
 
 		// Scroll the active word into the vertical center of the screen
 		const activeWordElement = presenter.querySelector('.active-word');
 		if (activeWordElement) {
-			const smoothness = scrollSmoothness.value; // Get the selected smoothness value
+				const smoothness = scrollSmoothness.value; // Get the selected smoothness value
 
-			// Check if the cursor is on the last line before a heading
-			const nextHeadingIndex = words.findIndex((w, index) => index > cursor && w.isHeading);
-			if (nextHeadingIndex !== -1) {
-				const isLastLineBeforeHeading = words[cursor]?.line === words[nextHeadingIndex]?.line - 1;
-				if (isLastLineBeforeHeading) {
-					// Scroll the last line to the top of the screen
-					activeWordElement.scrollIntoView({
-						behavior: smoothness === 'instant' ? 'auto' : 'smooth',
-						block: 'start', // Align the last line to the top of the screen
-					});
-					return; // Exit early to avoid centering the active word
+				// Check if the cursor is on the last line before a heading
+				const nextHeadingIndex = words.findIndex((w, index) => index > cursor && w.isHeading);
+				if (nextHeadingIndex !== -1) {
+						const isLastLineBeforeHeading = words[cursor]?.line === words[nextHeadingIndex]?.line - 1;
+						if (isLastLineBeforeHeading) {
+								// Scroll the last line to the top of the screen
+								activeWordElement.scrollIntoView({
+										behavior: smoothness === 'instant' ? 'auto' : 'smooth',
+										block: 'start', // Align the last line to the top of the screen
+								});
+								return; // Exit early to avoid centering the active word
+						}
 				}
-			}
 
-			// Default behavior: center the active word vertically
-			activeWordElement.scrollIntoView({
-				behavior: smoothness === 'instant' ? 'auto' : 'smooth',
-				block: 'center', // Center the active word vertically
-			});
+				// Default behavior: center the active word vertically
+				activeWordElement.scrollIntoView({
+						behavior: smoothness === 'instant' ? 'auto' : 'smooth',
+						block: 'center', // Center the active word vertically
+				});
 		}
-	}
+}
 
 	// Handle speech recognition
 	try {
