@@ -8,24 +8,35 @@
 		body {
 			margin: 0;
 			font-family: sans-serif;
+			overflow: hidden; /* Prevent scrolling on the body */
 		}
 		#toolbar {
+			position: fixed; /* Pin the toolbar to the top */
+			top: 0; /* Align it to the top of the screen */
+			left: 0;
+			width: 100%; /* Make it span the full width of the screen */
 			height: 40px;
 			padding: 5px 10px;
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
 			background: var(--toolbar-bg);
+			z-index: 1000; /* Ensure it stays above other elements */
 		}
 		#editor, #presenter {
+			margin-top: 40px; /* Add space below the toolbar */
 			width: 100%;
-			height: calc(100vh - 40px);
+			height: calc(100vh - 40px); /* Adjust height to account for the toolbar */
 			box-sizing: border-box;
 			padding: 10px;
 			resize: none;
 			border: none;
 			outline: none;
 			font-size: var(--font-size, 12px); /* Reduced base font size */
+		}
+		#editor {
+			overflow-y: auto; /* Enable vertical scrolling for the editor */
+			overflow-x: hidden; /* Prevent horizontal scrolling */
 		}
 		:root {
 			--font-size: 12px; /* Reduced from 24px to 12px */
@@ -41,10 +52,28 @@
 		#presenter {
 			color: #fff;
 			background: #000;
-			overflow-y: auto;
+			overflow-y: auto; /* Enable vertical scrolling for the presenter */
+			overflow-x: hidden; /* Prevent horizontal scrolling */
 			white-space: pre-wrap;
 			line-height: 1.25; /* Word wrapping line spacing: 1 + 1/4 of font height */
 			font-size: calc(var(--font-size, 12px) * 1.5); /* Increased font size for presenter mode */
+			height: 100vh; /* Ensure it takes up the full viewport height */
+			box-sizing: border-box; /* Include padding in height calculation */
+			padding-bottom: 1em; /* Add padding to avoid text touching the bottom */
+		}
+		body.dark #presenter {
+			scrollbar-color: #555 #222; /* Dark scrollbar with lighter thumb */
+			scrollbar-width: thin; /* Make the scrollbar thinner */
+		}
+		body.dark #presenter::-webkit-scrollbar {
+			width: 8px; /* Width of the scrollbar */
+		}
+		body.dark #presenter::-webkit-scrollbar-thumb {
+			background-color: #555; /* Darker thumb */
+			border-radius: 4px; /* Rounded edges */
+		}
+		body.dark #presenter::-webkit-scrollbar-track {
+			background-color: #222; /* Darker track */
 		}
 		#presenter p {
 			margin: 0; /* Remove default margins */
@@ -133,6 +162,14 @@
 
 		.active-word {
 			color: #aaffaa; /* Slightly greener color for the active word */
+		}
+
+		.heading {
+			color: #00aaff; /* Light blue */
+			font-weight: bold;
+			text-align: center; /* Center the heading */
+			display: block; /* Ensure it spans the full width */
+			margin: 1em 0; /* Add spacing around the heading */
 		}
 	</style>
 </head>
@@ -288,7 +325,7 @@
 				.replace(/\bquestion mark\b/gi, '?') // Replace "question mark" with "?"
 				.replace(/\bcomma\b/gi, ',') // Replace "comma" with ","
 				.replace(/\bexclamation mark\b/gi, '!') // Replace "exclamation mark" with "!"
-				.replace(/\bellipsis\b/gi, '...') // Replace "ellipsis" with "..."
+					.replace(/\bellipsis\b/gi, '...') // Replace "ellipsis" with "..."
 				.replace(/\bdot dot dot\b/gi, '...') // Replace "dot dot dot" with "..."
 				.replace(/\bcolon\b/gi, ':') // Replace "colon" with ":"
 				.replace(/\bsemicolon\b/gi, ';') // Replace "semicolon" with ";"
@@ -427,8 +464,8 @@
 		// Split text into words and lines
 		const paragraphs = editor.value.split(/\n\n+/);
 		const words = paragraphs.flatMap((p, i) => {
-			const lineWords = p.split(/\s+/).map(word => ({ word, line: i }));
-			lineWords.push({ word: '\n', line: i }); // Add a line break marker
+			const lineWords = p.split(/\s+/).map(word => ({ word, line: i, isHeading: p.startsWith('#') }));
+			lineWords.push({ word: '\n', line: i, isHeading: p.startsWith('#') }); // Add a line break marker
 			return lineWords;
 		});
 
@@ -449,6 +486,8 @@
 			words.forEach((w, i) => {
 				if (w.word === '\n') {
 					html += '<br>'; // Line break
+				} else if (w.isHeading) {
+					html += `<span class="heading">${w.word.replace('#', '').trim()}</span> `; // Render heading
 				} else if (i < cursor) {
 					html += `<span class="greyed-out">${w.word}</span> `;
 				} else if (i === cursor) {
@@ -485,37 +524,57 @@
 				for (const spokenWord of spokenWords) {
 					console.log(`Spoken word: "${spokenWord}"`); // Log the spoken word
 
+					 // Skip headings
+					while (cursor < words.length && words[cursor].isHeading) {
+						cursor++;
+					}
+
 					// Check if the spoken word matches the current word
 					if (cursor < words.length && spokenWord === words[cursor].word.toLowerCase()) {
 						console.log(`Matched expected word: "${words[cursor].word}" at cursor ${cursor}`);
 						cursor++; // Move to the next word
 					} else {
-						// Look ahead or behind for a match
+						// Look ahead or behind for a match with forward preference
 						let found = false;
+						let bestMatch = null;
+						let bestMatchOffset = null;
+
 						for (let offset = 1; offset <= 5; offset++) {
 							// Look ahead
 							if (cursor + offset < words.length && spokenWord === words[cursor + offset].word.toLowerCase()) {
-								console.log(
-									`Matched nearby word: "${words[cursor + offset].word}" at position ${cursor + offset} (lookahead)`
-								);
-								cursor += offset; // Skip ahead to the matching word
-								found = true;
-								break;
+								const forwardWeight = 1 / offset; // Weight decreases with distance
+								if (!bestMatch || forwardWeight > bestMatch.weight) {
+									bestMatch = { position: cursor + offset, weight: forwardWeight };
+									bestMatchOffset = offset;
+								}
 							}
 							// Look behind
 							if (cursor - offset >= 0 && spokenWord === words[cursor - offset].word.toLowerCase()) {
-								console.log(
-									`Matched nearby word: "${words[cursor - offset].word}" at position ${cursor - offset} (lookbehind)`
-								);
-								cursor -= offset; // Move back to the matching word
-								found = true;
-								break;
+								const backwardWeight = 1 / (offset * 2); // Lower weight for backward matches
+								if (!bestMatch || backwardWeight > bestMatch.weight) {
+									bestMatch = { position: cursor - offset, weight: backwardWeight };
+									bestMatchOffset = -offset;
+								}
 							}
 						}
+
+						if (bestMatch) {
+							cursor = bestMatch.position; // Move to the best match
+							console.log(
+								`Matched nearby word: "${words[cursor].word}" at position ${cursor} (offset: ${bestMatchOffset})`
+							);
+							found = true;
+						}
+
 						if (!found) {
 							// If no match is found, log the unmatched word
 							console.warn(`Unmatched word: "${spokenWord}"`);
 						}
+					}
+
+					 // Skip headings after moving the cursor
+					while (cursor < words.length && words[cursor].isHeading) {
+						cursor++;
 					}
 
 					// Log the updated cursor position
@@ -551,9 +610,9 @@
 			} else if (e.key === 'ArrowUp') {
 				// Move to the beginning of the previous line
 				const currentLine = words[cursor]?.line;
-				const prevLineIndex = words.slice(0, cursor).reverse().findIndex(w => w.line === currentLine - 1);
+				const prevLineIndex = words.findLastIndex(w => w.line === currentLine - 1); // Find the first word of the previous line
 				if (prevLineIndex !== -1) {
-					cursor = words.length - prevLineIndex - 1;
+					cursor = prevLineIndex;
 				} else {
 					// If no previous line, move to the first word
 					cursor = 0;
@@ -564,6 +623,11 @@
 			} else if (e.key === 'End') {
 				// Move to the end
 				cursor = words.length - 1;
+			}
+
+			// Skip headings after moving the cursor
+			while (cursor < words.length && words[cursor].isHeading) {
+				cursor++;
 			}
 
 			// Update the display after moving the cursor
