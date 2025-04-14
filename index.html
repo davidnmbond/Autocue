@@ -569,6 +569,22 @@
 		const vuMeterContainer = document.getElementById('vuMeterContainer');
 		vuMeterContainer.style.display = vuMeterToggle.checked ? 'block' : 'none';
 		vuMeterContainer.style.position = 'relative';
+
+		// Synchronize the editor's cursor position with the presenter's cursor
+		let charCount = 0;
+		for (let i = 0; i < words.length; i++) {
+			charCount += words[i].word.length + 1; // Add word length + 1 for the space
+			if (i === cursor) {
+				editorCursorPosition = charCount - words[i].word.length - 1; // Adjust to the start of the word
+				break;
+			}
+		}
+		editor.setSelectionRange(editorCursorPosition, editorCursorPosition); // Set the cursor position
+
+		// Scroll the editor to make the cursor visible
+		const lineHeight = parseFloat(window.getComputedStyle(editor).lineHeight);
+		const scrollTop = Math.max(0, editorCursorPosition * lineHeight - editor.clientHeight / 2);
+		editor.scrollTop = scrollTop;
 	}
 
 	// Render the presenter content
@@ -742,6 +758,22 @@
 
 		if (recognition) recognition.stop(); // Stop speech recognition
 		recognition = null;
+
+		// Synchronize the editor's cursor position with the presenter's cursor
+		let charCount = 0;
+		for (let i = 0; i < words.length; i++) {
+			charCount += words[i].word.length + 1; // Add word length + 1 for the space
+			if (i === cursor) {
+				editorCursorPosition = charCount - words[i].word.length - 1; // Adjust to the start of the word
+				break;
+			}
+		}
+		editor.setSelectionRange(editorCursorPosition, editorCursorPosition); // Set the cursor position
+
+		// Scroll the editor to make the cursor visible
+		const lineHeight = parseFloat(window.getComputedStyle(editor).lineHeight);
+		const scrollTop = Math.max(0, editorCursorPosition * lineHeight - editor.clientHeight / 2);
+		editor.scrollTop = scrollTop;
 	}
 
 	// Consolidated keydown event handler
@@ -782,7 +814,13 @@
 
 				case 'ArrowUp': { // Move to the beginning of the previous line
 					const currentLine = words[cursor]?.line;
-					const prevLineIndex = words.findIndex(w => w.line === currentLine - 1);
+					let prevLineIndex = words.findIndex(w => w.line === currentLine - 1);
+
+					// Skip over titles
+					while (prevLineIndex !== -1 && words[prevLineIndex]?.isHeading) {
+						prevLineIndex = words.findIndex(w => w.line === words[prevLineIndex]?.line - 1);
+					}
+
 					if (prevLineIndex !== -1) {
 						cursor = prevLineIndex;
 					} else {
