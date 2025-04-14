@@ -19,9 +19,18 @@
 			padding: 5px 10px;
 			display: flex;
 			align-items: center;
-			justify-content: space-between;
+			justify-content: space-between; /* Distribute space between elements */
 			background: var(--toolbar-bg);
 			z-index: 1000; /* Ensure it stays above other elements */
+			box-sizing: border-box; /* Include padding in width/height calculations */
+		}
+		#toolbar > div {
+			display: flex;
+			gap: 10px; /* Add spacing between dropdowns and toggles */
+			align-items: center;
+		}
+		#toolbar button {
+			margin-left: 10px; /* Add some spacing to the left of the button */
 		}
 		#editor, #presenter {
 			margin-top: 40px; /* Add space below the toolbar */
