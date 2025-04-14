@@ -610,7 +610,7 @@
 			} else if (e.key === 'ArrowUp') {
 				// Move to the beginning of the previous line
 				const currentLine = words[cursor]?.line;
-				const prevLineIndex = words.findLastIndex(w => w.line === currentLine - 1); // Find the first word of the previous line
+				const prevLineIndex = words.findIndex(w => w.line === currentLine - 1);
 				if (prevLineIndex !== -1) {
 					cursor = prevLineIndex;
 				} else {
@@ -632,6 +632,15 @@
 
 			// Update the display after moving the cursor
 			renderPresenter();
+
+			// Scroll the active word into the vertical center of the screen
+			const activeWordElement = presenter.querySelector('.active-word');
+			if (activeWordElement) {
+				activeWordElement.scrollIntoView({
+					behavior: 'smooth', // Smooth scrolling
+					block: 'center', // Center the active word vertically
+				});
+			}
 		}
 
 		document.addEventListener('keydown', presenterKeyHandler);
@@ -644,8 +653,8 @@
 			document.getElementById('toolbar').style.display = 'flex';
 			editor.style.display = 'block';
 			presenter.style.display = 'none';
-			document.removeEventListener('keydown', presenterKeyHandler);
-			if (recognition) recognition.stop();
+			document.removeEventListener('keydown', presenterKeyHandler); // Remove presenter-specific key bindings
+			if (recognition) recognition.stop(); // Stop speech recognition
 			recognition = null;
 		}
 	}
@@ -654,6 +663,19 @@
 	document.addEventListener('keydown', (event) => {
 		if (event.ctrlKey && event.key === 'Enter') {
 			enterPresenter();
+		}
+	});
+
+	// Add key bindings for switching between modes
+	document.addEventListener('keydown', (event) => {
+		// Enter presentation mode with Ctrl+Enter or Esc in edit mode
+		if ((event.ctrlKey && event.key === 'Enter') || (event.key === 'Escape' && editor.style.display !== 'none')) {
+			enterPresenter();
+		}
+
+		// Exit presentation mode with Esc
+		if (event.key === 'Escape' && presenter.style.display !== 'none') {
+			exitPresenter();
 		}
 	});
 
