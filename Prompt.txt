@@ -1,0 +1,5 @@
+write a single-page Autocue app that has two modes: edit and present.
+
+In edit mode, local storage should be checks for a file.  If present, the file is loaded into an editor, which should respect the user's preferences for light vs. dark mode and should be full screen, except for a toolbar at the top which should have a "Present" button.  With each character that is typed, local storage should be updated with the changes, so as to avoid data loss if they disconnect.  The user can select a font size in the toolbar.
+
+I present mode, the app should be dark mode only.  The microphone should listen for the user's voice and dim words already spoken, smoothly scrolling the text upwards.  If the user presses spacebar or down arror, the app should assume that the current paragraph has been spoken.  If the up arrow is pressed, the app should go back to the previous paragraph.  If the home button is pressed, the app should go back to the beginning.

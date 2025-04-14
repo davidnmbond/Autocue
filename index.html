@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Autocue</title>
+	<style>
+		body {
+			margin: 0;
+			font-family: sans-serif;
+		}
+		#toolbar {
+			height: 40px;
+			padding: 5px 10px;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			background: var(--toolbar-bg);
+		}
+		#editor, #presenter {
+			width: 100%;
+			height: calc(100vh - 40px);
+			box-sizing: border-box;
+			padding: 10px;
+			resize: none;
+			border: none;
+			outline: none;
+			font-size: var(--font-size, 12px); /* Reduced base font size */
+		}
+		:root {
+			--font-size: 12px; /* Reduced from 24px to 12px */
+			--toolbar-bg: #f0f0f0;
+			--text-color: #000;
+			--bg-color: #fff;
+		}
+		body.dark {
+			--toolbar-bg: #333;
+			--text-color: #fff;
+			--bg-color: #000;
+		}
+		#presenter {
+			color: #fff;
+			background: #000;
+			overflow-y: auto;
+			white-space: pre-wrap;
+			line-height: 1.25; /* Word wrapping line spacing: 1 + 1/4 of font height */
+			font-size: calc(var(--font-size, 12px) * 1.5); /* Increased font size for presenter mode */
+		}
+		#presenter p {
+			margin: 0; /* Remove default margins */
+			margin-bottom: 0.375em; /* Reduced paragraph spacing from 0.75em to 0.375em */
+		}
+		.dim {
+			opacity: 0.3;
+		}
+		#voiceStatus {
+			margin-left: 10px;
+			font-size: 0.9em;
+			color: gray;
+		}
+		body.dark #editor {
+			background: var(--bg-color);
+			color: var(--text-color);
+			}
+		#vuMeterContainer {
+			width: 100%;
+			height: 10px;
+			background: linear-gradient(to right, green, yellow, red); /* Gradient background */
+			position: relative;
+			margin-bottom: 5px;
+			overflow: hidden; /* Ensure the overlay stays within bounds */
+		}
+
+		#vuMeter {
+			height: 100%;
+			width: 100%; /* Start fully covering the container */
+			background-color: black; /* Black overlay */
+			transition: width 0.05s ease-in-out; /* Smooth shrinking */
+			position: absolute;
+			right: 0; /* Start from the right */
+		}
+
+		/* Toggle switch styling */
+		.toggle-switch {
+			position: relative;
+			display: inline-block;
+			width: 34px;
+			height: 20px;
+		}
+
+		.toggle-switch input {
+			opacity: 0;
+			width: 0;
+			height: 0;
+		}
+
+		.slider {
+			position: absolute;
+			cursor: pointer;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background-color: #ccc;
+			transition: 0.4s;
+			border-radius: 20px;
+		}
+
+		.slider:before {
+			position: absolute;
+			content: '';
+			height: 14px;
+			width: 14px;
+			left: 3px;
+			bottom: 3px;
+			background-color: white;
+			transition: 0.4s;
+			border-radius: 50%;
+		}
+
+		input:checked + .slider {
+			background-color: #2196F3;
+		}
+
+		input:checked + .slider:before {
+			transform: translateX(14px);
+		}
+	</style>
+</head>
+<body>
+	<div id="toolbar">
+		<div>
+			<select id="fontSize">
+				<option value="20px">Small</option>
+				<option value="24px" selected>Medium</option>
+				<option value="30px">Large</option>
+				<option value="36px">Extra Large</option>
+				<option value="42px">Huge</option>
+			</select>
+			<select id="scrollSmoothness">
+				<option value="instant">Instant</option>
+				<option value="smooth" selected>Smooth</option>
+				<option value="very-smooth">Very Smooth</option>
+				<option value="ultra-smooth">Ultra Smooth</option>
+				<option value="glide">Glide</option>
+			</select>
+			 <label class="toggle-switch">
+				<input type="checkbox" id="dictationToggle">
+				<span class="slider"></span>
+			</label>
+			<span id="voiceStatus"></span>
+		</div>
+		<button onclick="enterPresenter()">Present</button>
+	</div>
+	<div id="vuMeterContainer">
+		<div id="vuMeter"></div>
+	</div>
+	<textarea id="editor" autofocus></textarea>
+	<div id="presenter" style="display:none;"></div>
+
+	<script>
+	const dictationToggle = document.getElementById('dictationToggle');
+	const vuMeter = document.getElementById('vuMeter');
+	const editor = document.getElementById('editor');
+	const presenter = document.getElementById('presenter');
+	const fontSize = document.getElementById('fontSize');
+	const voiceStatus = document.getElementById('voiceStatus');
+	const scrollSmoothness = document.getElementById('scrollSmoothness');
+	const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+	// Respect user's dark mode preference in edit mode
+	if (prefersDark) {
+		document.body.classList.add('dark');
+	}
+
+	// Hide dictation toggle if voice recognition is unavailable
+	if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+		voiceStatus.textContent = 'Voice recognition available';
+		dictationToggle.parentElement.style.display = 'inline-block';
+	} else {
+		voiceStatus.textContent = 'Voice recognition not available';
+		dictationToggle.parentElement.style.display = 'none';
+	}
+
+	// Font size change listener
+	fontSize.addEventListener('change', () => {
+		const selectedFontSize = fontSize.value;
+		document.documentElement.style.setProperty('--font-size', selectedFontSize);
+	});
+
+	// Save preferences to localStorage
+	fontSize.addEventListener('change', () => {
+		const selectedFontSize = fontSize.value;
+		localStorage.setItem('fontSize', selectedFontSize);
+		document.documentElement.style.setProperty('--font-size', selectedFontSize);
+	});
+
+	scrollSmoothness.addEventListener('change', () => {
+		const selectedSmoothness = scrollSmoothness.value;
+		localStorage.setItem('scrollSmoothness', selectedSmoothness);
+	});
+
+	dictationToggle.addEventListener('change', () => {
+		const isDictationEnabled = dictationToggle.checked;
+		localStorage.setItem('voiceRecognition', isDictationEnabled);
+	});
+
+	// Load content from local storage when the page loads
+	if (localStorage.getItem('autocueText')) {
+		editor.value = localStorage.getItem('autocueText');
+	}
+
+	// Save content to local storage whenever the editor's content changes
+	editor.addEventListener('input', () => {
+		localStorage.setItem('autocueText', editor.value);
+	});
+
+	// Consolidated dictation toggle event listener
+	dictationToggle.addEventListener('change', () => {
+		if (dictationToggle.checked) {
+			if (!audioContext) {
+				audioContext = new AudioContext(); // Initialize AudioContext if not already created
+			}
+			if (audioContext.state === 'suspended') {
+				audioContext.resume().then(() => {
+					console.log('AudioContext resumed successfully.');
+				}).catch((err) => {
+					console.error('Error resuming AudioContext:', err);
+				});
+			}
+			startDictation();
+		} else {
+			stopDictation();
+		}
+	});
+
+	let recognition = null;
+	let audioContext = null;
+	let analyser = null;
+	let microphone = null;
+	let animationFrameId = null;
+
+	// Ensure the VU meter updates correctly
+	function startDictation() {
+		if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+			alert('Speech recognition is not supported in this browser.');
+			dictationToggle.checked = false;
+			return;
+		}
+
+		// Reset recognition if it was previously stopped
+		if (recognition) {
+			recognition.stop();
+			recognition = null;
+		}
+
+		recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+		recognition.continuous = true;
+		recognition.interimResults = true;
+
+		let lastTranscript = '';
+
+		recognition.onresult = (event) => {
+			const transcript = Array.from(event.results)
+				.filter(result => result.isFinal)
+				.map(result => result[0].transcript)
+				.join('');
+
+			// Process the transcript for punctuation and formatting
+			let processedTranscript = transcript
+				.replace(/\bfull stop\b/gi, '.') // Replace "full stop" with "."
+				.replace(/\bquestion mark\b/gi, '?') // Replace "question mark" with "?"
+				.replace(/\bcomma\b/gi, ',') // Replace "comma" with ","
+				.replace(/\bexclamation mark\b/gi, '!') // Replace "exclamation mark" with "!"
+				.replace(/\bellipsis\b/gi, '...') // Replace "ellipsis" with "..."
+				.replace(/\bdot dot dot\b/gi, '...') // Replace "dot dot dot" with "..."
+				.replace(/\bcolon\b/gi, ':') // Replace "colon" with ":"
+				.replace(/\bsemicolon\b/gi, ';') // Replace "semicolon" with ";"
+				.replace(/\bnew paragraph\b/gi, '\n\n') // Replace "new paragraph" with a double newline
+				.replace(/\s+([.,?!;:])/g, '$1') // Remove spaces before punctuation
+				.replace(/([.,?!;:])([^\s])/g, '$1 $2') // Add space after punctuation if missing
+				.replace(/^\s+|\s+$/g, ''); // Trim leading/trailing spaces
+
+			processedTranscript = processedTranscript.replace(/(?:^|[.?!;:]\s+)([a-z])/g, (match, p1) => p1.toUpperCase());
+
+			// Check if the user said "delete last sentence"
+			if (processedTranscript.toLowerCase().includes('delete last sentence')) {
+				const content = editor.value.trim();
+				const lastSentenceIndex = content.lastIndexOf('.');
+				if (lastSentenceIndex !== -1) {
+					editor.value = content.substring(0, lastSentenceIndex + 1).trim(); // Keep everything up to the last period
+				} else {
+					editor.value = ''; // If no sentence is found, clear the editor
+				}
+				localStorage.setItem('autocueText', editor.value); // Save updated content to local storage
+				return; // Exit early to avoid appending "delete last sentence" to the editor
+			}
+
+			// Ensure only new content is appended
+			const newContent = processedTranscript.replace(lastTranscript, '').trim();
+
+			if (newContent) {
+				const cursorPosition = editor.selectionStart;
+				const textBeforeCursor = editor.value.substring(0, cursorPosition);
+				const textAfterCursor = editor.value.substring(editor.selectionEnd);
+
+				// Handle "new paragraph" on its own
+				if (newContent === '\n\n') {
+					editor.value = textBeforeCursor + '\n\n' + textAfterCursor;
+				}
+				// Handle standalone punctuation like "full stop" or "question mark"
+				else if (['.', '?', '!', ':', ';'].includes(newContent)) {
+					const trimmedTextBeforeCursor = textBeforeCursor.trimEnd();
+					// Avoid redundant punctuation
+					if (!trimmedTextBeforeCursor.endsWith(newContent)) {
+						editor.value = trimmedTextBeforeCursor + newContent + textAfterCursor;
+					}
+				}
+				// Handle regular text
+				else {
+					editor.value = textBeforeCursor + newContent + ' ' + textAfterCursor;
+				}
+
+				// Update the last transcript to the full processed transcript
+				lastTranscript = processedTranscript;
+
+				// Recalculate cursor position after insertion
+				const newCursorPosition = editor.value.length - textAfterCursor.length;
+				editor.setSelectionRange(newCursorPosition, newCursorPosition);
+
+				// Save updated content to local storage
+				localStorage.setItem('autocueText', editor.value);
+			}
+		};
+
+		recognition.start();
+
+		navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+			console.log('Microphone access granted:', stream);
+			audioContext = new AudioContext();
+			analyser = audioContext.createAnalyser();
+			const microphone = audioContext.createMediaStreamSource(stream);
+			console.log('Microphone connected to analyser:', microphone);
+			analyser.fftSize = 256;
+			microphone.connect(analyser);
+			console.log('Analyser connected:', analyser);
+			console.log('FFT Size:', analyser.fftSize);
+			console.log('Frequency Bin Count:', analyser.frequencyBinCount);
+
+			const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+			function updateVuMeter() {
+				analyser.getByteFrequencyData(dataArray);
+				const volume = Math.max(...dataArray);
+				const percentage = (volume / 255) * 100;
+
+				// Shrink the black overlay based on the volume percentage
+				vuMeter.style.width = `${100 - percentage}%`; // Black bar shrinks as volume increases
+
+				requestAnimationFrame(updateVuMeter);
+			}
+
+			updateVuMeter();
+		}).catch((err) => {
+			console.error('Error accessing microphone:', err);
+			alert('Microphone access is required for the VU meter to work.');
+			dictationToggle.checked = false;
+			dictationToggle.disabled = true; // Disable the toggle
+		});
+	}
+
+	function stopDictation() {
+		if (recognition) {
+			recognition.stop();
+			recognition = null;
+		}
+
+		if (audioContext) {
+			console.log('Closing AudioContext...');
+			audioContext.close();
+			audioContext = null;
+		}
+
+		if (microphone && microphone.mediaStream) {
+			console.log('Stopping microphone tracks...');
+			const tracks = microphone.mediaStream.getTracks();
+			tracks.forEach(track => track.stop());
+			microphone = null;
+		}
+
+		if (animationFrameId) {
+			console.log('Cancelling animation frame...');
+			cancelAnimationFrame(animationFrameId);
+			animationFrameId = null;
+		}
+
+		vuMeter.style.width = '0%'; // Reset the VU meter
+	}
+
+		let current = 0;
+		let paragraphs = [];
+		let ps = [];
+
+		function enterPresenter() {
+			// Force dark mode in presenter mode
+			document.body.classList.add('dark');
+			document.getElementById('toolbar').style.display = 'none';
+			editor.style.display = 'none';
+			presenter.style.display = 'block';
+
+			// Scale font size for presentation mode
+			const selectedFontSize = parseInt(fontSize.value, 10); // Parse font size as a number
+			presenter.style.fontSize = `${selectedFontSize * 1.5}px`; // Scale font size for presentation mode
+
+			paragraphs = editor.value.split(/\n\n+/);
+			current = 0;
+			presenter.innerHTML = paragraphs.map(p => `<p>${p}</p>`).join('');
+			ps = presenter.querySelectorAll('p');
+
+			function updateDisplay() {
+				const smoothness = scrollSmoothness.value;
+
+				ps.forEach((p, i) => p.classList.toggle('dim', i < current));
+				ps[current]?.scrollIntoView({
+					behavior: smoothness === 'instant' ? 'auto' : 'smooth',
+					block: 'center',
+				});
+
+				// Adjust timing for custom smoothness levels
+				if (smoothness === 'very-smooth') {
+					presenter.style.scrollBehavior = 'smooth';
+					setTimeout(() => (presenter.style.scrollBehavior = 'auto'), 1500); // 3x longer
+				} else if (smoothness === 'ultra-smooth') {
+					presenter.style.scrollBehavior = 'smooth';
+					setTimeout(() => (presenter.style.scrollBehavior = 'auto'), 3000); // 3x longer
+				} else if (smoothness === 'glide') {
+					presenter.style.scrollBehavior = 'smooth';
+					setTimeout(() => (presenter.style.scrollBehavior = 'auto'), 9000); // 3x longer
+				}
+			}
+
+			updateDisplay();
+
+			document.addEventListener('keydown', presenterKeyHandler);
+
+			try {
+				recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+				recognition.continuous = true;
+				recognition.interimResults = true;
+				recognition.onresult = (e) => {
+					const transcript = e.results[e.results.length - 1][0].transcript.toLowerCase();
+					const target = ps[current]?.innerText.toLowerCase();
+					if (transcript.length > 20 && target && transcript.includes(target.substring(0, Math.min(target.length, 30)))) {
+						if (current < paragraphs.length - 1) current++;
+						updateDisplay();
+					}
+				};
+				recognition.start();
+			} catch(e) {
+				console.warn('Speech recognition not supported or blocked:', e);
+			}
+
+			function presenterKeyHandler(e) {
+				if (e.key === ' ' || e.key === 'ArrowDown') {
+					if (current < paragraphs.length - 1) current++;
+					e.preventDefault();
+				} else if (e.key === 'ArrowUp') {
+					if (current > 0) current--;
+					e.preventDefault();
+				} else if (e.key === 'Home') {
+					current = 0;
+					e.preventDefault();
+				} else if (e.key === 'Escape') {
+					exitPresenter();
+				}
+				updateDisplay();
+			}
+		}
+
+		function exitPresenter() {
+			// Restore user's dark mode preference in edit mode
+			if (!prefersDark) {
+				document.body.classList.remove('dark');
+			}
+			document.getElementById('toolbar').style.display = 'flex';
+			editor.style.display = 'block';
+			presenter.style.display = 'none';
+			document.removeEventListener('keydown', presenterKeyHandler);
+			if (recognition) recognition.stop();
+			recognition = null;
+		}
+
+		// Add Ctrl+Enter to trigger presentation mode
+		document.addEventListener('keydown', (event) => {
+			if (event.ctrlKey && event.key === 'Enter') {
+				enterPresenter();
+			}
+		});
+
+	// Load preferences from localStorage
+	window.addEventListener('DOMContentLoaded', () => {
+		// Load font size preference
+		const savedFontSize = localStorage.getItem('fontSize');
+		if (savedFontSize) {
+			fontSize.value = savedFontSize;
+			document.documentElement.style.setProperty('--font-size', savedFontSize);
+		}
+
+		// Load scroll smoothness preference
+		const savedSmoothness = localStorage.getItem('scrollSmoothness');
+		if (savedSmoothness) {
+			scrollSmoothness.value = savedSmoothness;
+		}
+
+		// Load voice recognition preference
+		const savedVoiceRecognition = localStorage.getItem('voiceRecognition');
+		if (savedVoiceRecognition !== null) {
+			dictationToggle.checked = savedVoiceRecognition === 'true';
+
+			// Start or stop dictation based on the loaded preference
+			if (dictationToggle.checked) {
+				if (!audioContext) {
+					audioContext = new AudioContext(); // Initialize AudioContext if not already created
+				}
+				if (audioContext.state === 'suspended') {
+					audioContext.resume().then(() => {
+						console.log('AudioContext resumed successfully.');
+					}).catch((err) => {
+						console.error('Error resuming AudioContext:', err);
+					});
+				}
+				startDictation();
+			} else {
+				stopDictation();
+			}
+		}
+	});
+	</script>
+</body>
+</html>
