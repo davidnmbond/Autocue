@@ -224,6 +224,13 @@
 		localStorage.setItem('autocueText', editor.value);
 	});
 
+	let editorCursorPosition = 0; // Variable to store the cursor position in the editor
+
+	editor.addEventListener('keyup', () => {
+		editorCursorPosition = editor.selectionStart; // Update the cursor position
+		localStorage.setItem('editorCursorPosition', editorCursorPosition); // Save to localStorage
+	});
+
 	// Consolidated dictation toggle event listener
 	dictationToggle.addEventListener('change', () => {
 		if (dictationToggle.checked) {
@@ -425,7 +432,16 @@
 			return lineWords;
 		});
 
-		let cursor = 0; // Virtual cursor to track the current word
+		// Initialize the cursor based on the editor's cursor position
+		let cursor = 0; // Default to the start
+		let charCount = 0; // Track character count to map to the word index
+		for (let i = 0; i < words.length; i++) {
+			charCount += words[i].word.length + 1; // Add word length + 1 for the space
+			if (charCount > editorCursorPosition) {
+				cursor = i; // Set the cursor to the corresponding word index
+				break;
+			}
+		}
 
 		// Render the presenter content
 		function renderPresenter() {
@@ -613,6 +629,13 @@
 			} else {
 				stopDictation();
 			}
+		}
+
+		// Load cursor position
+		const savedCursorPosition = localStorage.getItem('editorCursorPosition');
+		if (savedCursorPosition !== null) {
+			editorCursorPosition = parseInt(savedCursorPosition, 10);
+			editor.setSelectionRange(editorCursorPosition, editorCursorPosition); // Restore cursor position
 		}
 	});
 	</script>
