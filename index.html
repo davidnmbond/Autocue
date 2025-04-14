@@ -216,13 +216,6 @@
 				<option value="36px">Extra Large</option>
 				<option value="42px">Huge</option>
 			</select>
-			<select id="scrollSmoothness">
-				<option value="instant">Instant</option>
-				<option value="smooth" selected>Smooth</option>
-				<option value="very-smooth">Very Smooth</option>
-				<option value="ultra-smooth">Ultra Smooth</option>
-				<option value="glide">Glide</option>
-			</select>
 			<select id="wordSeekRange">
 				<option value="3">3 Words</option>
 				<option value="5" selected>5 Words</option>
@@ -261,7 +254,6 @@
 	const presenter = document.getElementById('presenter');
 	const fontSize = document.getElementById('fontSize');
 	const voiceStatus = document.getElementById('voiceStatus');
-	const scrollSmoothness = document.getElementById('scrollSmoothness');
 	const wordSeekRange = document.getElementById('wordSeekRange');
 	const presenterWidth = document.getElementById('presenterWidth');
 	const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -294,11 +286,6 @@
 		const selectedFontSize = fontSize.value;
 		localStorage.setItem('fontSize', selectedFontSize);
 		document.documentElement.style.setProperty('--font-size', selectedFontSize);
-	});
-
-	scrollSmoothness.addEventListener('change', () => {
-		const selectedSmoothness = scrollSmoothness.value;
-		localStorage.setItem('scrollSmoothness', selectedSmoothness);
 	});
 
 	// Save the word seek range to localStorage
@@ -655,7 +642,6 @@
 		// Scroll the active word into the vertical center of the screen
 		const activeWordElement = presenter.querySelector('.active-word');
 		if (activeWordElement) {
-			const smoothness = scrollSmoothness.value; // Get the selected smoothness value
 	
 			// Check if the cursor is on the last line before a heading
 			const nextHeadingIndex = words.findIndex((w, index) => index > cursor && w.isHeading);
@@ -664,7 +650,7 @@
 				if (isLastLineBeforeHeading) {
 					// Scroll the last line to the top of the screen
 					activeWordElement.scrollIntoView({
-						behavior: smoothness === 'instant' ? 'auto' : 'smooth',
+						behavior: 'smooth',
 						block: 'start', // Align the last line to the top of the screen
 					});
 					return; // Exit early to avoid centering the active word
@@ -673,7 +659,7 @@
 	
 			// Default behavior: center the active word vertically
 			activeWordElement.scrollIntoView({
-				behavior: smoothness === 'instant' ? 'auto' : 'smooth',
+				behavior: 'smooth',
 				block: 'center', // Center the active word vertically
 			});
 		}
@@ -692,8 +678,6 @@
 			for (const spokenWord of spokenWords) {
 				if (!spokenWord) continue; // Skip empty words
 
-				console.log(`Spoken word: "${spokenWord}"`); // Log the spoken word
-
 				// Skip headings
 				while (cursor < words.length && words[cursor].isHeading) {
 					cursor++;
@@ -701,7 +685,6 @@
 
 				// Check if the spoken word matches the current word
 				if (cursor < words.length && spokenWord === words[cursor].word.toLowerCase()) {
-					console.log(`Matched expected word: "${words[cursor].word}" at cursor ${cursor}`);
 					cursor++; // Move to the next word
 				} else {
 					// Look ahead or behind for a match with forward preference
@@ -733,15 +716,7 @@
 
 					if (bestMatch) {
 						cursor = bestMatch.position; // Move to the best match
-						console.log(
-							`Matched nearby word: "${words[cursor].word}" at position ${cursor} (offset: ${bestMatchOffset})`
-						);
 						found = true;
-					}
-
-					if (!found) {
-						// If no match is found, log the unmatched word
-						console.warn(`Unmatched word: "${spokenWord}"`);
 					}
 				}
 
@@ -749,9 +724,6 @@
 				while (cursor < words.length && words[cursor].isHeading) {
 					cursor++;
 				}
-
-				// Log the updated cursor position
-				console.log(`Cursor moved to position: ${cursor}`);
 			}
 
 			// Update the presenter display
@@ -908,33 +880,27 @@
 		// Load textarea content
 		const savedContent = localStorage.getItem('autocueText');
 		if (savedContent !== null) {
-				editor.value = savedContent; // Set the textarea content
+			editor.value = savedContent; // Set the textarea content
 		}
 
 		// Load font size preference
 		const savedFontSize = localStorage.getItem('fontSize');
 		if (savedFontSize) {
-				fontSize.value = savedFontSize;
-				document.documentElement.style.setProperty('--font-size', savedFontSize);
-		}
-
-		// Load scroll smoothness preference
-		const savedSmoothness = localStorage.getItem('scrollSmoothness');
-		if (savedSmoothness) {
-				scrollSmoothness.value = savedSmoothness;
+			fontSize.value = savedFontSize;
+			document.documentElement.style.setProperty('--font-size', savedFontSize);
 		}
 
 		// Load cursor position
 		const savedCursorPosition = localStorage.getItem('editorCursorPosition');
 		if (savedCursorPosition !== null) {
-				editorCursorPosition = parseInt(savedCursorPosition, 10);
-				editor.setSelectionRange(editorCursorPosition, editorCursorPosition); // Restore cursor position
+			editorCursorPosition = parseInt(savedCursorPosition, 10);
+			editor.setSelectionRange(editorCursorPosition, editorCursorPosition); // Restore cursor position
 		}
 
 		// Load the word seek range from localStorage
 		const savedWordSeekRange = localStorage.getItem('wordSeekRange');
 		if (savedWordSeekRange) {
-				wordSeekRange.value = savedWordSeekRange;
+			wordSeekRange.value = savedWordSeekRange;
 		}
 
 		// Load the VU meter preference
@@ -948,10 +914,10 @@
 		// Load presenter width preference
 		const savedPresenterWidth = localStorage.getItem('presenterWidth');
 		if (savedPresenterWidth) {
-				presenterWidth.value = savedPresenterWidth; // Set the dropdown value
-				presenter.style.width = savedPresenterWidth; // Apply the width to the presenter
+			presenterWidth.value = savedPresenterWidth; // Set the dropdown value
+			presenter.style.width = savedPresenterWidth; // Apply the width to the presenter
 		} else {
-				presenter.style.width = '100%'; // Default to 100% if no value is saved
+			presenter.style.width = '100%'; // Default to 100% if no value is saved
 		}
 	});
 
