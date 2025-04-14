@@ -302,6 +302,14 @@
 		localStorage.setItem('editorCursorPosition', editorCursorPosition); // Save to localStorage
 	});
 
+	editor.addEventListener('input', saveCursorPosition);
+	editor.addEventListener('mouseup', saveCursorPosition);
+
+	function saveCursorPosition() {
+		editorCursorPosition = editor.selectionStart; // Update the cursor position
+		localStorage.setItem('editorCursorPosition', editorCursorPosition); // Save to localStorage
+	}
+
 	// Consolidated dictation toggle event listener
 	dictationToggle.addEventListener('change', () => {
 		if (dictationToggle.checked) {
@@ -387,14 +395,14 @@
 				.replace(/\bquestion mark\b/gi, '?') // Replace "question mark" with "?"
 				.replace(/\bcomma\b/gi, ',') // Replace "comma" with ","
 				.replace(/\bexclamation mark\b/gi, '!') // Replace "exclamation mark" with "!"
-					.replace(/\bellipsis\b/gi, '...') // Replace "ellipsis" with "..."
-				.replace(/\bdot dot dot\b/gi, '...') // Replace "dot dot dot" with "..."
 				.replace(/\bcolon\b/gi, ':') // Replace "colon" with ":"
 				.replace(/\bsemicolon\b/gi, ';') // Replace "semicolon" with ";"
 				.replace(/\bnew paragraph\b/gi, '\n\n') // Replace "new paragraph" with a double newline
 				.replace(/\s+([.,?!;:])/g, '$1') // Remove spaces before punctuation
 				.replace(/([.,?!;:])([^\s])/g, '$1 $2') // Add space after punctuation if missing
-				.replace(/^\s+|\s+$/g, ''); // Trim leading/trailing spaces
+				.replace(/^\s+|\s+$/g, '') // Trim leading/trailing spaces
+				.replace(/\bellipsis\b/gi, '...') // Replace "ellipsis" with "..."
+				.replace(/\bdot dot dot\b/gi, '...'); // Replace "dot dot dot" with "..."
 
 			processedTranscript = processedTranscript.replace(/(?:^|[.?!;:]\s+)([a-z])/g, (match, p1) => p1.toUpperCase());
 
@@ -573,8 +581,24 @@
 			const activeWordElement = presenter.querySelector('.active-word');
 			if (activeWordElement) {
 				const smoothness = scrollSmoothness.value; // Get the selected smoothness value
+
+				// Check if the cursor is on the last line before a heading
+				const nextHeadingIndex = words.findIndex((w, index) => index > cursor && w.isHeading);
+				if (nextHeadingIndex !== -1) {
+					const isLastLineBeforeHeading = words[cursor]?.line === words[nextHeadingIndex]?.line - 1;
+					if (isLastLineBeforeHeading) {
+						// Scroll the last line to the top of the screen
+						activeWordElement.scrollIntoView({
+							behavior: smoothness === 'instant' ? 'auto' : 'smooth',
+							block: 'start', // Align the last line to the top of the screen
+						});
+						return; // Exit early to avoid centering the active word
+					}
+				}
+
+				// Default behavior: center the active word vertically
 				activeWordElement.scrollIntoView({
-					behavior: smoothness === 'instant' ? 'auto' : 'smooth', // Use 'auto' for instant scrolling
+					behavior: smoothness === 'instant' ? 'auto' : 'smooth',
 					block: 'center', // Center the active word vertically
 				});
 			}
@@ -593,9 +617,11 @@
 				const spokenWords = transcript.split(/\s+/);
 
 				for (const spokenWord of spokenWords) {
+					if (!spokenWord) continue; // Skip empty words
+
 					console.log(`Spoken word: "${spokenWord}"`); // Log the spoken word
 
-					 // Skip headings
+					// Skip headings
 					while (cursor < words.length && words[cursor].isHeading) {
 						cursor++;
 					}
@@ -611,7 +637,7 @@
 						let bestMatchOffset = null;
 
 						// Get the range from the dropdown
-						const seekRange = parseInt(wordSeekRange.value, 5);
+						const seekRange = parseInt(wordSeekRange.value, 10);
 
 						for (let offset = 1; offset <= seekRange; offset++) {
 							// Look ahead
@@ -644,9 +670,9 @@
 							// If no match is found, log the unmatched word
 							console.warn(`Unmatched word: "${spokenWord}"`);
 						}
-					}
+						}
 
-					 // Skip headings after moving the cursor
+					// Skip headings after moving the cursor
 					while (cursor < words.length && words[cursor].isHeading) {
 						cursor++;
 					}
@@ -662,62 +688,6 @@
 		} catch (e) {
 			console.warn('Speech recognition not supported or blocked:', e);
 		}
-
-		// Handle keyboard interruptions
-		function presenterKeyHandler(e) {
-			if (e.key === 'ArrowRight') {
-				// Move forward one word
-				if (cursor < words.length - 1) cursor++;
-			} else if (e.key === 'ArrowLeft') {
-				// Move back one word
-				if (cursor > 0) cursor--;
-			} else if (e.key === 'ArrowDown') {
-				// Move to the beginning of the next line
-				const currentLine = words[cursor]?.line;
-				const nextLineIndex = words.findIndex(w => w.line === currentLine + 1);
-				if (nextLineIndex !== -1) {
-					cursor = nextLineIndex;
-				} else {
-					// If no next line, move to the last word
-					cursor = words.length - 1;
-				}
-			} else if (e.key === 'ArrowUp') {
-				// Move to the beginning of the previous line
-				const currentLine = words[cursor]?.line;
-				const prevLineIndex = words.findIndex(w => w.line === currentLine - 1);
-				if (prevLineIndex !== -1) {
-					cursor = prevLineIndex;
-				} else {
-					// If no previous line, move to the first word
-					cursor = 0;
-				}
-			} else if (e.key === 'Home') {
-				// Move to the start
-				cursor = 0;
-			} else if (e.key === 'End') {
-				// Move to the end
-				cursor = words.length - 1;
-			}
-
-			// Skip headings after moving the cursor
-			while (cursor < words.length && words[cursor].isHeading) {
-				cursor++;
-			}
-
-			// Update the display after moving the cursor
-			renderPresenter();
-
-			// Scroll the active word into the vertical center of the screen
-			const activeWordElement = presenter.querySelector('.active-word');
-			if (activeWordElement) {
-				activeWordElement.scrollIntoView({
-					behavior: 'smooth', // Smooth scrolling
-					block: 'center', // Center the active word vertically
-				});
-			}
-		}
-
-		document.addEventListener('keydown', presenterKeyHandler);
 
 		function exitPresenter() {
 			// Restore user's dark mode preference in edit mode
@@ -740,40 +710,71 @@
 		}
 	}
 
-	// Add Ctrl+Enter to trigger presentation mode
+	// Consolidated keydown event handler
 	document.addEventListener('keydown', (event) => {
-		if (event.ctrlKey && event.key === 'Enter') {
-			enterPresenter();
-		}
-	});
-
-	// Add key bindings for switching between modes
-	document.addEventListener('keydown', (event) => {
-		// Enter presentation mode with Ctrl+Enter or Esc in edit mode
-		if ((event.ctrlKey && event.key === 'Enter') || (event.key === 'Escape' && editor.style.display !== 'none')) {
-			enterPresenter();
-		}
-
-		// Exit presentation mode with Esc
-		if (event.key === 'Escape' && presenter.style.display !== 'none') {
-			exitPresenter();
-		}
-	});
-
-	// Add key bindings for toggling between modes
-	document.addEventListener('keydown', (event) => {
-		// Toggle between edit and presentation mode with Escape
+		// Always exit presentation mode with Escape
 		if (event.key === 'Escape') {
-			if (presenter.style.display === 'none') {
-				enterPresenter(); // Switch to presentation mode
-			} else {
-				exitPresenter(); // Switch to edit mode
-			}
+			exitPresenter();
+			return;
 		}
 
 		// Enter presentation mode with Ctrl+Enter
 		if (event.ctrlKey && event.key === 'Enter') {
 			enterPresenter();
+			return;
+		}
+
+		// Handle navigation keys in presentation mode
+		if (presenter.style.display !== 'none') {
+			switch (event.key) {
+				case 'ArrowRight': // Move forward one word
+					if (cursor < words.length - 1) cursor++;
+					break;
+				case 'ArrowLeft': // Move back one word
+					if (cursor > 0) cursor--;
+					break;
+				case 'ArrowDown': // Move to the beginning of the next line
+					const currentLine = words[cursor]?.line;
+					const nextLineIndex = words.findIndex(w => w.line === currentLine + 1);
+					if (nextLineIndex !== -1) {
+						cursor = nextLineIndex;
+					} else {
+						cursor = words.length - 1; // Move to the last word if no next line
+					}
+					break;
+				case 'ArrowUp': // Move to the beginning of the previous line
+					const prevLine = words[cursor]?.line;
+					const prevLineIndex = words.findIndex(w => w.line === prevLine - 1);
+					if (prevLineIndex !== -1) {
+						cursor = prevLineIndex;
+					} else {
+						cursor = 0; // Move to the first word if no previous line
+					}
+					break;
+				case 'Home': // Move to the start
+					cursor = 0;
+					break;
+				case 'End': // Move to the end
+					cursor = words.length - 1;
+					break;
+			}
+
+			// Skip headings after moving the cursor
+			while (cursor < words.length && words[cursor].isHeading) {
+				cursor++;
+			}
+
+			// Update the presenter display
+			renderPresenter();
+
+			// Scroll the active word into the vertical center of the screen
+			const activeWordElement = presenter.querySelector('.active-word');
+			if (activeWordElement) {
+				activeWordElement.scrollIntoView({
+					behavior: 'smooth', // Smooth scrolling
+					block: 'center', // Center the active word vertically
+				});
+			}
 		}
 	});
 
@@ -826,6 +827,15 @@
 		const savedWordSeekRange = localStorage.getItem('wordSeekRange');
 		if (savedWordSeekRange) {
 			wordSeekRange.value = savedWordSeekRange;
+		}
+	});
+
+	window.addEventListener('DOMContentLoaded', () => {
+		// Load cursor position
+		const savedCursorPosition = localStorage.getItem('editorCursorPosition');
+		if (savedCursorPosition !== null) {
+			editorCursorPosition = parseInt(savedCursorPosition, 10);
+			editor.setSelectionRange(editorCursorPosition, editorCursorPosition); // Restore cursor position
 		}
 	});
 	</script>
