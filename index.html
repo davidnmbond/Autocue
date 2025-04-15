@@ -911,21 +911,26 @@
 									// Get the range from the dropdown
 									const seekRange = parseInt(wordSeekRange.value, 10);
 
-									for (let offset = 1; offset <= seekRange; offset++) {
-										// Look ahead
+									for (let offset = 0; offset <= seekRange; offset++) {
+										// Check the current word (offset = 0)
+										if (offset === 0 && cursor < words.length && spokenWord === words[cursor].word.toLowerCase()) {
+											bestMatch = { position: cursor, weight: 1 }; // Exact match at the cursor
+											break;
+										}
+
+										// Check forward (cursor + offset)
 										if (cursor + offset < words.length && spokenWord === words[cursor + offset].word.toLowerCase()) {
 											const forwardWeight = 1 / offset; // Weight decreases with distance
 											if (!bestMatch || forwardWeight > bestMatch.weight) {
 												bestMatch = { position: cursor + offset, weight: forwardWeight };
-												bestMatchOffset = offset;
 											}
 										}
-										// Look behind
+
+										// Check backward (cursor - offset)
 										if (cursor - offset >= 0 && spokenWord === words[cursor - offset].word.toLowerCase()) {
-											const backwardWeight = 1 / (offset * 2); // Lower weight for backward matches
+											const backwardWeight = 1 / offset; // Weight decreases with distance
 											if (!bestMatch || backwardWeight > bestMatch.weight) {
 												bestMatch = { position: cursor - offset, weight: backwardWeight };
-												bestMatchOffset = -offset;
 											}
 										}
 									}
