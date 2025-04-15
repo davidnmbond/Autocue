@@ -1,9 +1,19 @@
 ```
 #Introduction
 
-Hello everybody.
+Hello everybody.  Welcome to Autocue.
 
 This tutorial will demonstrate how to use Autocue effectively, including both keyboard controls and configuration options in edit mode.
+
+#Presentation Mode
+
+To enter presentation mode, press Ctrl Enter.  The system will start the presentation from where you were last editing.
+
+This will put Autocue into full screen, with larger text and smooth scrolling.
+
+When reading, try to keep your gaze near the centre of the screen.  This will enable a more natural delivery.
+
+To exit presentation mode and return to editing, press the Escape key.
 
 With practice, you’ll be able to read smoothly and naturally, just like a pro.
 
@@ -16,17 +26,6 @@ To move up and down by a paragraph, use the Up and Down Arrow keys.
 To nudge your position left or right by a word, use the Left and Right Arrow keys.
 
 Press the Home key to jump to the beginning of your script, or the End key to go to the end.
-
-#Presentation Mode
-
-To enter presentation mode, press Ctrl Enter.  The system will start the presentation from where you were last editing.
-
-This will put Autocue into full screen, with larger text and smooth scrolling.
-
-When reading, try to keep your gaze near the centre of the screen.  This will enable a more natural delivery.
-
-To exit presentation mode and return to editing, press the Escape key.
-
 #Edit Mode Settings
 
 In edit mode, you can configure several settings to match your preferences:
