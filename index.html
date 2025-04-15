@@ -791,6 +791,7 @@ To move up and down by a paragraph, use the Up and Down Arrow keys.
 To nudge your position left or right by a word, use the Left and Right Arrow keys.
 
 Press the Home key to jump to the beginning of your script, or the End key to go to the end.
+
 #Edit Mode Settings
 
 In edit mode, you can configure several settings to match your preferences:
@@ -961,53 +962,57 @@ Now you’re ready to practice your delivery, tweak the settings to your liking,
 							const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
 							const spokenWords = transcript.split(/\s+/);
 
+							function normalizeWord(word) {
+								return word.toLowerCase().replace(/[.,?!;:]/g, ''); // Convert to lowercase and remove punctuation
+							}
+
 							for (const spokenWord of spokenWords) {
 								if (!spokenWord) continue; // Skip empty words
+
+								// Normalize the spoken word
+								const normalizedSpokenWord = normalizeWord(spokenWord);
 
 								// Skip headings
 								while (cursor < words.length && words[cursor].isHeading) {
 									cursor++;
 								}
 
-								// Check if the spoken word matches the current word
-								if (cursor < words.length && spokenWord === words[cursor].word.toLowerCase()) {
-									cursor++; // Move to the next word
-								} else {
-									// Look ahead or behind for a match with forward preference
-									let found = false;
-									let bestMatch = null;
-									
-									// Get the range from the dropdown
-									const seekRange = parseInt(wordSeekRange.value, 10);
+								// Search for the best match starting from the center and working outward
+								let bestMatch = null;
 
-									for (let offset = 0; offset <= seekRange; offset++) {
-										// Check the current word (offset = 0)
-										if (offset === 0 && cursor < words.length && spokenWord === words[cursor].word.toLowerCase()) {
-											bestMatch = { position: cursor, weight: 1 }; // Exact match at the cursor
-											break;
-										}
+								// Get the range from the dropdown
+								const seekRange = parseInt(wordSeekRange.value, 10);
 
-										// Check forward (cursor + offset)
-										if (cursor + offset < words.length && spokenWord === words[cursor + offset].word.toLowerCase()) {
-											const forwardWeight = 1 / offset; // Weight decreases with distance
-											if (!bestMatch || forwardWeight > bestMatch.weight) {
-												bestMatch = { position: cursor + offset, weight: forwardWeight };
-											}
-										}
+								for (let offset = 0; offset <= seekRange; offset++) {
+									// Normalize the script word for comparison
+									const forwardWord = cursor + offset < words.length ? normalizeWord(words[cursor + offset].word) : null;
+									const backwardWord = cursor - offset >= 0 ? normalizeWord(words[cursor - offset].word) : null;
 
-										// Check backward (cursor - offset)
-										if (cursor - offset >= 0 && spokenWord === words[cursor - offset].word.toLowerCase()) {
-											const backwardWeight = 1 / offset; // Weight decreases with distance
-											if (!bestMatch || backwardWeight > bestMatch.weight) {
-												bestMatch = { position: cursor - offset, weight: backwardWeight };
-											}
+									// Check the current word (offset = 0)
+									if (offset === 0 && forwardWord === normalizedSpokenWord) {
+										bestMatch = { position: cursor, weight: 1 }; // Exact match at the cursor
+										break;
+									}
+
+									// Check forward (cursor + offset)
+									if (forwardWord === normalizedSpokenWord) {
+										const forwardWeight = 1 / offset; // Weight decreases with distance
+										if (!bestMatch || forwardWeight > bestMatch.weight) {
+											bestMatch = { position: cursor + offset, weight: forwardWeight };
 										}
 									}
 
-									if (bestMatch) {
-										cursor = bestMatch.position + 1; // Move to the best match
-										found = true;
+									// Check backward (cursor - offset)
+									if (backwardWord === normalizedSpokenWord) {
+										const backwardWeight = 1 / offset; // Weight decreases with distance
+										if (!bestMatch || backwardWeight > bestMatch.weight) {
+											bestMatch = { position: cursor - offset, weight: backwardWeight };
+										}
 									}
+								}
+
+								if (bestMatch) {
+									cursor = bestMatch.position + 1; // Move to the word after the best match
 								}
 
 								// Skip headings after moving the cursor

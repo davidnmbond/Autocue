@@ -26,6 +26,7 @@ To move up and down by a paragraph, use the Up and Down Arrow keys.
 To nudge your position left or right by a word, use the Left and Right Arrow keys.
 
 Press the Home key to jump to the beginning of your script, or the End key to go to the end.
+
 #Edit Mode Settings
 
 In edit mode, you can configure several settings to match your preferences:
