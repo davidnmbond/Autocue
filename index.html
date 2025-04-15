@@ -92,19 +92,21 @@
 			/* Prevent horizontal scrolling */
 			white-space: pre-wrap;
 			line-height: 1.25;
-			/* Word wrapping line spacing: 1 + 1/4 of font height */
+			/* Word wrapping line spacing */
 			font-size: calc(var(--font-size, 12px) * 1.5);
 			/* Increased font size for presenter mode */
 			height: 100vh;
 			/* Ensure it takes up the full viewport height */
 			box-sizing: border-box;
 			/* Include padding in height calculation */
-			padding-bottom: 1em;
+			padding-bottom: 50vh;
 			/* Add padding to avoid text touching the bottom */
 			margin: 0 auto;
 			/* Center the presenter horizontally */
 			width: 100%;
 			/* Default width, adjustable via dropdown */
+			padding-top: 50vh;
+			/* Add top padding equal to half the viewport height */
 		}
 
 		body.dark #presenter {
@@ -292,6 +294,47 @@
 			color: grey;
 			font-weight: bold;
 		}
+
+		#centerLineMarkers {
+			position: absolute;
+			top: 50%;
+			left: 0;
+			width: 100%;
+			height: 0;
+			pointer-events: none;
+			/* Ensure the markers don't block interactions */
+			transform: translateY(-50%);
+			/* Center vertically */
+			z-index: 10;
+			/* Ensure the markers are above the text */
+		}
+
+		.triangle {
+			position: absolute;
+			width: 0;
+			height: 0;
+			border-style: solid;
+			pointer-events: none;
+			/* Ensure the markers don't block interactions */
+		}
+
+		.triangle.left {
+			left: 10px;
+			/* Position the left triangle */
+			border-width: 15px 15px 15px 0;
+			/* Adjust size */
+			border-color: transparent grey transparent transparent;
+			/* Make the triangle point right */
+		}
+
+		.triangle.right {
+			right: 10px;
+			/* Position the right triangle */
+			border-width: 15px 0 15px 15px;
+			/* Adjust size */
+			border-color: transparent transparent transparent grey;
+			/* Make the triangle point left */
+		}
 	</style>
 </head>
 
@@ -334,7 +377,12 @@
 		<div id="vuMeter"></div>
 	</div>
 	<textarea id="editor" autofocus></textarea>
-	<div id="presenter" style="display:none;"></div>
+	<div id="presenter" style="display:none;">
+		<div id="centerLineMarkers">
+			<div class="triangle left"></div>
+			<div class="triangle right"></div>
+		</div>
+	</div>
 
 	<script>
 		const dictationToggle = document.getElementById('dictationToggle');
@@ -489,7 +537,7 @@
 		function exitPresenter() {
 			// Set mode back to edit
 			mode = 'edit';
-			
+
 			// Restore user's dark mode preference in edit mode
 			document.body.classList.remove('presentation');
 			if (!prefersDark) {
@@ -589,14 +637,39 @@
 
 			presenter.innerHTML = html;
 
-			// Scroll the active word into the vertical center of the screen
+			// Smoothly scroll the active word into the vertical center of the screen
 			const activeWordElement = presenter.querySelector('.active-word');
 			if (activeWordElement) {
-				activeWordElement.scrollIntoView({
-					behavior: 'smooth',
-					block: 'center', // Center the active word vertically
-				});
+				smoothScrollTo(activeWordElement);
 			}
+		}
+
+		function smoothScrollTo(targetElement) {
+			const presenter = document.getElementById('presenter');
+			const targetPosition = targetElement.offsetTop - presenter.clientHeight / 2 + targetElement.clientHeight / 2;
+			const startPosition = presenter.scrollTop;
+			const distance = targetPosition - startPosition;
+			const duration = 2000; // Increase duration to 2000ms (2 seconds) for a slower scroll
+			let startTime = null;
+
+			function easeOutQuad(t) {
+				return t * (2 - t); // Easing function for smooth scrolling
+			}
+
+			function scrollStep(timestamp) {
+				if (!startTime) startTime = timestamp;
+				const elapsed = timestamp - startTime;
+				const progress = Math.min(elapsed / duration, 1); // Ensure progress does not exceed 1
+				const ease = easeOutQuad(progress);
+
+				presenter.scrollTop = startPosition + distance * ease;
+
+				if (progress < 1) {
+					requestAnimationFrame(scrollStep);
+				}
+			}
+
+			requestAnimationFrame(scrollStep);
 		}
 
 		function exitPresenter() {
@@ -710,7 +783,7 @@
 						break;
 					}
 
-					case 'PageUp': { // Jump to the previous heading
+					case 'PageUp': { // Jump to the previous heading instantly
 						let prevHeadingIndex = -1;
 
 						// Search for the previous heading before the current cursor position
@@ -731,6 +804,34 @@
 							cursor = prevHeadingIndex; // Move to the previous heading
 						} else {
 							cursor = 0; // Move to the start if no previous headings are found
+						}
+
+						// Update the presenter display
+						renderPresenter();
+
+						// Instantly scroll to the active word
+						const activeWordElement = presenter.querySelector('.active-word');
+						if (activeWordElement) {
+							presenter.scrollTop = activeWordElement.offsetTop - presenter.clientHeight / 2 + activeWordElement.clientHeight / 2;
+						}
+						break;
+					}
+
+					case 'PageDown': { // Jump to the next heading instantly
+						const nextHeadingIndex = words.findIndex((w, index) => index > cursor && w.isHeading);
+						if (nextHeadingIndex !== -1) {
+							cursor = nextHeadingIndex;
+						} else {
+							cursor = words.length - 1; // Move to the last word if no more headings
+						}
+
+						// Update the presenter display
+						renderPresenter();
+
+						// Instantly scroll to the active word
+						const activeWordElement = presenter.querySelector('.active-word');
+						if (activeWordElement) {
+							presenter.scrollTop = activeWordElement.offsetTop - presenter.clientHeight / 2 + activeWordElement.clientHeight / 2;
 						}
 						break;
 					}
@@ -905,7 +1006,7 @@ Now you're ready to practice your delivery, tweak the settings to your liking, a
 					recognition.onresult = (event) => {
 
 						//console.log('Speech recognition result in ' + mode + ':', event.results);
-						
+
 						// Do different things, depending on the mode
 						if (mode == 'edit') {
 
@@ -972,7 +1073,7 @@ Now you're ready to practice your delivery, tweak the settings to your liking, a
 							const spokenWords = transcript.split(/\s+/);
 
 							function normalizeWord(word) {
-								return word.toLowerCase().replace(/[.,?!;:*]+$/g, '').replace(/^\*|\*$/g, ''); 
+								return word.toLowerCase().replace(/[.,?!;:*]+$/g, '').replace(/^\*|\*$/g, '');
 								// Convert to lowercase, remove trailing punctuation, and strip asterisks
 							}
 
@@ -1062,7 +1163,7 @@ Now you're ready to practice your delivery, tweak the settings to your liking, a
 			const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
 			function updateVuMeter() {
-				if(analyser) {
+				if (analyser) {
 					analyser.getByteFrequencyData(dataArray);
 					const volume = Math.max(...dataArray);
 					const percentage = (volume / 255) * 100;
@@ -1083,6 +1184,34 @@ Now you're ready to practice your delivery, tweak the settings to your liking, a
 			}
 
 			vuMeter.style.width = '100%'; // Reset the VU Meter
+		}
+
+		function smoothScrollTo(targetElement) {
+			const presenter = document.getElementById('presenter');
+			const targetPosition = targetElement.offsetTop - presenter.clientHeight / 2 + targetElement.clientHeight / 2;
+			const startPosition = presenter.scrollTop;
+			const distance = targetPosition - startPosition;
+			const duration = 2000; // Increase duration to 2000ms (2 seconds) for a slower scroll
+			let startTime = null;
+
+			function easeOutQuad(t) {
+				return t * (2 - t); // Easing function for smooth scrolling
+			}
+
+			function scrollStep(timestamp) {
+				if (!startTime) startTime = timestamp;
+				const elapsed = timestamp - startTime;
+				const progress = Math.min(elapsed / duration, 1); // Ensure progress does not exceed 1
+				const ease = easeOutQuad(progress);
+
+				presenter.scrollTop = startPosition + distance * ease;
+
+				if (progress < 1) {
+					requestAnimationFrame(scrollStep);
+				}
+			}
+
+			requestAnimationFrame(scrollStep);
 		}
 	</script>
 </body>
