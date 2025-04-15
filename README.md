@@ -45,6 +45,8 @@ When editing, you can create headers by starting a line with the hash character.
 
 Leave a line between each paragraph.  This makes it easier to track where you are when presenting.
 
+You can surround a word with *asterisks* for additional emphasis.  These appear bold and yellow in the presentation mode.
+
 Avoid unusual punctuation, as the speech recognition cannot understand them.  Avoid numbers and hyphenated words.  For example, use one hundred and twenty three instead of the equivalent as a number.
 
 #Saving Your Work
@@ -59,7 +61,7 @@ If you experience any problems, you can simply reload the page.
 
 #Wrap-up
 
-That’s it!
+That's it !
 
 Now you’re ready to practice your delivery, tweak the settings to your liking, and feel confident using Autocue for any speaking scenario.
 
