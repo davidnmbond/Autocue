@@ -1,6 +1,6 @@
-The App: https://davidnmbond.github.io/Autocue/
-Demo video: https://youtu.be/bWheWBxE33I
-Source code: https://github.com/davidnmbond/Autocue
+* The App: https://davidnmbond.github.io/Autocue/
+* Demo video: https://youtu.be/bWheWBxE33I
+* Source code: https://github.com/davidnmbond/Autocue
 
 It's free and open source (MIT licence)
 
