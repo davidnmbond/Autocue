@@ -1,4 +1,6 @@
-To use Autocue, visit https://davidnmbond.github.io/Autocue/
+The App: https://davidnmbond.github.io/Autocue/
+Demo video: https://youtu.be/bWheWBxE33I
+Source code: https://github.com/davidnmbond/Autocue
 
 It's free and open source (MIT licence)
 
@@ -16,9 +18,6 @@ Use the standard browser controls:
 * Start/Stop Full Screen: F11
 * Zoom: Ctrl+/- or Ctrl+Scrollwheel
 
-The App: https://davidnmbond.github.io/Autocue/
-Demo video: https://youtu.be/bWheWBxE33I
-Source code: https://github.com/davidnmbond/Autocue
 Enjoy!
 
 ```
