@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,127 +9,189 @@
 		body {
 			margin: 0;
 			font-family: sans-serif;
-			overflow: hidden; /* Prevent scrolling on the body */
+			overflow: hidden;
+			/* Prevent scrolling on the body */
 		}
+
 		#toolbar {
-			position: fixed; /* Pin the toolbar to the top */
-			top: 0; /* Align it to the top of the screen */
+			position: fixed;
+			/* Pin the toolbar to the top */
+			top: 0;
+			/* Align it to the top of the screen */
 			left: 0;
-			width: 100%; /* Make it span the full width of the screen */
+			width: 100%;
+			/* Make it span the full width of the screen */
 			height: 40px;
 			padding: 5px 10px;
 			display: flex;
 			align-items: center;
-			justify-content: space-between; /* Distribute space between elements */
+			justify-content: space-between;
+			/* Distribute space between elements */
 			background: var(--toolbar-bg);
-			z-index: 1000; /* Ensure it stays above other elements */
-			box-sizing: border-box; /* Include padding in width/height calculations */
+			z-index: 1000;
+			/* Ensure it stays above other elements */
+			box-sizing: border-box;
+			/* Include padding in width/height calculations */
 		}
-		#toolbar > div {
+
+		#toolbar>div {
 			display: flex;
-			gap: 10px; /* Add spacing between dropdowns and toggles */
+			gap: 10px;
+			/* Add spacing between dropdowns and toggles */
 			align-items: center;
 		}
+
 		#toolbar button {
-			margin-left: 10px; /* Add some spacing to the left of the button */
+			margin-left: 10px;
+			/* Add some spacing to the left of the button */
 		}
-		#editor, #presenter {
-			margin-top: 40px; /* Add space below the toolbar */
+
+		#editor,
+		#presenter {
+			margin-top: 40px;
+			/* Add space below the toolbar */
 			width: 100%;
-			height: calc(100vh - 40px); /* Adjust height to account for the toolbar */
+			height: calc(100vh - 40px);
+			/* Adjust height to account for the toolbar */
 			box-sizing: border-box;
 			padding: 10px;
 			resize: none;
 			border: none;
 			outline: none;
-			font-size: var(--font-size, 12px); /* Reduced base font size */
+			font-size: var(--font-size, 12px);
+			/* Reduced base font size */
 		}
+
 		#editor {
-			overflow-y: auto; /* Enable vertical scrolling for the editor */
-			overflow-x: hidden; /* Prevent horizontal scrolling */
+			overflow-y: auto;
+			/* Enable vertical scrolling for the editor */
+			overflow-x: hidden;
+			/* Prevent horizontal scrolling */
 		}
+
 		:root {
-			--font-size: 12px; /* Reduced from 24px to 12px */
+			--font-size: 12px;
+			/* Reduced from 24px to 12px */
 			--toolbar-bg: #f0f0f0;
 			--text-color: #000;
 			--bg-color: #fff;
 		}
+
 		body.dark {
 			--toolbar-bg: #333;
 			--text-color: #fff;
 			--bg-color: #000;
 		}
+
 		#presenter {
 			color: #fff;
 			background: #000;
-			overflow-y: auto; /* Enable vertical scrolling for the presenter */
-			overflow-x: hidden; /* Prevent horizontal scrolling */
+			overflow-y: auto;
+			/* Enable vertical scrolling for the presenter */
+			overflow-x: hidden;
+			/* Prevent horizontal scrolling */
 			white-space: pre-wrap;
-			line-height: 1.25; /* Word wrapping line spacing: 1 + 1/4 of font height */
-			font-size: calc(var(--font-size, 12px) * 1.5); /* Increased font size for presenter mode */
-			height: 100vh; /* Ensure it takes up the full viewport height */
-			box-sizing: border-box; /* Include padding in height calculation */
-			padding-bottom: 1em; /* Add padding to avoid text touching the bottom */
-			margin: 0 auto; /* Center the presenter horizontally */
-			width: 100%; /* Default width, adjustable via dropdown */
+			line-height: 1.25;
+			/* Word wrapping line spacing: 1 + 1/4 of font height */
+			font-size: calc(var(--font-size, 12px) * 1.5);
+			/* Increased font size for presenter mode */
+			height: 100vh;
+			/* Ensure it takes up the full viewport height */
+			box-sizing: border-box;
+			/* Include padding in height calculation */
+			padding-bottom: 1em;
+			/* Add padding to avoid text touching the bottom */
+			margin: 0 auto;
+			/* Center the presenter horizontally */
+			width: 100%;
+			/* Default width, adjustable via dropdown */
 		}
+
 		body.dark #presenter {
-			scrollbar-color: #555 #222; /* Dark scrollbar with lighter thumb */
-			scrollbar-width: thin; /* Make the scrollbar thinner */
+			scrollbar-color: #555 #222;
+			/* Dark scrollbar with lighter thumb */
+			scrollbar-width: thin;
+			/* Make the scrollbar thinner */
 		}
+
 		body.dark #presenter::-webkit-scrollbar {
-			width: 8px; /* Width of the scrollbar */
+			width: 8px;
+			/* Width of the scrollbar */
 		}
+
 		body.dark #presenter::-webkit-scrollbar-thumb {
-			background-color: #555; /* Darker thumb */
-			border-radius: 4px; /* Rounded edges */
+			background-color: #555;
+			/* Darker thumb */
+			border-radius: 4px;
+			/* Rounded edges */
 		}
+
 		body.dark #presenter::-webkit-scrollbar-track {
-			background-color: #222; /* Darker track */
+			background-color: #222;
+			/* Darker track */
 		}
+
 		#presenter p {
-			margin: 0; /* Remove default margins */
-			margin-bottom: 0.375em; /* Reduced paragraph spacing from 0.75em to 0.375em */
+			margin: 0;
+			/* Remove default margins */
+			margin-bottom: 0.375em;
+			/* Reduced paragraph spacing from 0.75em to 0.375em */
 		}
+
 		.dim {
 			opacity: 0.3;
 		}
+
 		#voiceStatus {
 			margin-left: 10px;
 			font-size: 0.9em;
 			color: gray;
 		}
+
 		body.dark #editor {
 			background: var(--bg-color);
 			color: var(--text-color);
-			}
+		}
+
 		#vuMeterContainer {
 			width: 100%;
 			height: 10px;
-			background: linear-gradient(to right, green, yellow, orange, red); /* Gradient background */
-			position: fixed; /* Pin it to the screen */
-			top: 40px; /* Default position below the toolbar in edit mode */
+			background: linear-gradient(to right, green, yellow, orange, red);
+			/* Gradient background */
+			position: fixed;
+			/* Pin it to the screen */
+			top: 40px;
+			/* Default position below the toolbar in edit mode */
 			left: 0;
-			z-index: 1001; /* Ensure it stays above other elements but below modal dialogs */
-			overflow: hidden; /* Ensure the overlay stays within bounds */
-			display: block; /* Default display */
+			z-index: 1001;
+			/* Ensure it stays above other elements but below modal dialogs */
+			overflow: hidden;
+			/* Ensure the overlay stays within bounds */
+			display: block;
+			/* Default display */
 		}
 
 		#vuMeter {
 			height: 100%;
-			width: 100%; /* Start fully covering the container */
-			background-color: black; /* Black overlay */
-			transition: width 0.05s ease-in-out; /* Smooth shrinking */
+			width: 100%;
+			/* Start fully covering the container */
+			background-color: black;
+			/* Black overlay */
+			transition: width 0.05s ease-in-out;
+			/* Smooth shrinking */
 			position: absolute;
-			right: 0; /* Start from the right */
+			right: 0;
+			/* Start from the right */
 		}
 
 		#vuMeterContainer.hidden {
-			display: none; /* Hide the VU meter when toggled off */
+			display: none;
+			/* Hide the VU meter when toggled off */
 		}
 
 		body.presentation #vuMeterContainer {
-			top: 0; /* Pin it to the very top in presenter mode */
+			top: 0;
+			/* Pin it to the very top in presenter mode */
 		}
 
 		/* Toggle switch styling */
@@ -169,11 +232,11 @@
 			border-radius: 50%;
 		}
 
-		input:checked + .slider {
+		input:checked+.slider {
 			background-color: #2196F3;
 		}
 
-		input:checked + .slider:before {
+		input:checked+.slider:before {
 			transform: translateX(14px);
 		}
 
@@ -183,28 +246,38 @@
 		}
 
 		.active-word {
-			color: #aaffaa; /* Slightly greener color for the active word */
+			color: #aaffaa;
+			/* Slightly greener color for the active word */
 		}
 
 		.heading {
-			color: #00aaff; /* Light blue */
+			color: #00aaff;
+			/* Light blue */
 			font-weight: bold;
-			text-align: center; /* Center the heading */
-			display: block; /* Ensure the heading spans the full width */
-			margin: 1em 0; /* Add spacing around the heading */
-			white-space: nowrap; /* Prevent line breaks within the heading */
+			text-align: center;
+			/* Center the heading */
+			display: block;
+			/* Ensure the heading spans the full width */
+			margin: 1em 0;
+			/* Add spacing around the heading */
+			white-space: nowrap;
+			/* Prevent line breaks within the heading */
 		}
 
 		#toolbar span {
-			color: var(--text-color); /* Ensure toolbar text contrasts with the background */
+			color: var(--text-color);
+			/* Ensure toolbar text contrasts with the background */
 			font-size: 0.9em;
 			margin-left: 5px;
 		}
+
 		body.presentation {
-			background-color: black; /* Ensure the entire viewport has a black background */
+			background-color: black;
+			/* Ensure the entire viewport has a black background */
 		}
 	</style>
 </head>
+
 <body>
 	<div id="toolbar">
 		<span id="voiceStatus"></span>
@@ -227,11 +300,11 @@
 				<option value="80%">80%</option>
 				<option value="50%">50%</option>
 			</select>
-			 <label class="toggle-switch">
+			<label class="toggle-switch">
 				<input type="checkbox" id="dictationToggle">
 				<span class="slider"></span>
 			</label>
-			 <span>Dictation</span>
+			<span>Dictation</span>
 			<label class="toggle-switch">
 				<input type="checkbox" id="vuMeterToggle" checked>
 				<span class="slider"></span>
@@ -247,514 +320,385 @@
 	<div id="presenter" style="display:none;"></div>
 
 	<script>
-	const dictationToggle = document.getElementById('dictationToggle');
-	const vuMeter = document.getElementById('vuMeter');
-	const vuMeterToggle = document.getElementById('vuMeterToggle');
-	const editor = document.getElementById('editor');
-	const presenter = document.getElementById('presenter');
-	const fontSize = document.getElementById('fontSize');
-	const voiceStatus = document.getElementById('voiceStatus');
-	const wordSeekRange = document.getElementById('wordSeekRange');
-	const presenterWidth = document.getElementById('presenterWidth');
-	const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+		const dictationToggle = document.getElementById('dictationToggle');
+		const vuMeter = document.getElementById('vuMeter');
+		const vuMeterToggle = document.getElementById('vuMeterToggle');
+		const editor = document.getElementById('editor');
+		const presenter = document.getElementById('presenter');
+		const fontSize = document.getElementById('fontSize');
+		const voiceStatus = document.getElementById('voiceStatus');
+		const wordSeekRange = document.getElementById('wordSeekRange');
+		const presenterWidth = document.getElementById('presenterWidth');
+		const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-	let editorCursorPosition = 0; // Variable to store the cursor position in the editor
-	let recognition = null;
-	let audioContext = null;
-	let analyser = null;
-	let microphone = null;
-	let animationFrameId = null;
-	let cursor = 0; // Global cursor variable
-	let words = []; // Global words array
+		let editorCursorPosition = 0; // Variable to store the cursor position in the editor
+		let globalMediaStream = null; // Global variable to store the media stream
+		let recognition = null;
+		let audioContext = null;
+		let analyser = null;
+		let microphone = null;
+		let animationFrameId = null;
+		let cursor = 0; // Global cursor variable
+		let words = []; // Global words array
+		let mode = 'edit'; // Default mode is 'edit'
 
-	function getAudioContext() {
-		if (!audioContext) {
-			audioContext = new AudioContext();
-		}
-		return audioContext;
-	}
-
-	// Respect user's dark mode preference in edit mode
-	if (prefersDark) {
-		document.body.classList.add('dark');
-	}
-
-	// Hide dictation toggle if voice recognition is unavailable
-	if (window.SpeechRecognition || window.webkitSpeechRecognition) {
-		voiceStatus.textContent = 'Voice recognition available';
-		dictationToggle.parentElement.style.display = 'inline-block';
-	} else {
-		voiceStatus.textContent = 'Voice recognition not available.  Try Chrome!';
-		dictationToggle.parentElement.style.display = 'none';
-	}
-
-	// Font size change listener
-	fontSize.addEventListener('change', () => {
-		const selectedFontSize = fontSize.value;
-		localStorage.setItem('fontSize', selectedFontSize);
-		document.documentElement.style.setProperty('--font-size', selectedFontSize);
-	});
-
-	// Save the word seek range to localStorage
-	wordSeekRange.addEventListener('change', () => {
-		localStorage.setItem('wordSeekRange', wordSeekRange.value);
-	});
-
-	// Update presenter width on change
-	presenterWidth.addEventListener('change', () => {
-		const selectedWidth = presenterWidth.value;
-		localStorage.setItem('presenterWidth', selectedWidth); // Save to localStorage
-		presenter.style.width = selectedWidth; // Apply the width to the presenter
-	});
-
-	// Save content to local storage whenever the editor's content changes
-	editor.addEventListener('input', () => {
-		localStorage.setItem('autocueText', editor.value);
-		saveCursorPosition(); // Save cursor position on input
-	});
-
-	editor.addEventListener('mouseup', saveCursorPosition);
-	editor.addEventListener('keyup', saveCursorPosition);
-
-	function saveCursorPosition() {
-		editorCursorPosition = editor.selectionStart; // Update the cursor position
-		localStorage.setItem('editorCursorPosition', editorCursorPosition); // Save to localStorage
-	}
-
-	// Consolidated dictation toggle event listener
-	dictationToggle.addEventListener('change', () => {
-		if (dictationToggle.checked) {
-			if (!audioContext) {
-				audioContext = new AudioContext(); // Initialize AudioContext if not already created
-			}
-			if (audioContext.state === 'suspended') {
-				audioContext.resume().then(() => {
-					console.log('AudioContext resumed successfully.');
-				}).catch((err) => {
-					console.error('Error resuming AudioContext:', err);
-				});
-			}
-			startDictation();
-		} else {
-			stopDictation();
-		}
-	});
-
-	// Save the VU meter preference to localStorage
-	vuMeterToggle.addEventListener('change', () => {
-		const isVuMeterEnabled = vuMeterToggle.checked;
-		localStorage.setItem('vuMeterEnabled', isVuMeterEnabled);
-		toggleVuMeter(isVuMeterEnabled);
-	});
-
-	// Function to toggle the VU meter visibility
-	function toggleVuMeter(isEnabled) {
-		const vuMeterContainer = document.getElementById('vuMeterContainer');
-		if (isEnabled) {
-			vuMeterContainer.classList.remove('hidden');
-			vuMeterContainer.style.display = 'block';
-			vuMeterContainer.style.position = 'fixed';
-			vuMeterContainer.style.top = document.body.classList.contains('presentation') ? '0' : '40px'; // Adjust position
-
-			// Start the VU Meter
+		function getAudioContext() {
 			if (!audioContext) {
 				audioContext = new AudioContext();
 			}
-			if (audioContext.state === 'suspended') {
-				audioContext.resume().then(() => {
-					console.log('AudioContext resumed successfully.');
-					startVuMeter();
-				}).catch((err) => {
-					console.error('Error resuming AudioContext:', err);
-				});
-			} else {
-				startVuMeter();
-			}
+			return audioContext;
+		}
+
+		// Respect user's dark mode preference in edit mode
+		if (prefersDark) {
+			document.body.classList.add('dark');
+		}
+
+		// Hide dictation toggle if voice recognition is unavailable
+		if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+			voiceStatus.textContent = 'Voice recognition available';
+			dictationToggle.parentElement.style.display = 'inline-block';
 		} else {
-			vuMeterContainer.classList.add('hidden');
-			vuMeterContainer.style.display = 'none';
-
-			// Stop the VU Meter
-			stopVuMeter();
-		}
-	}
-
-	// Ensure the VU meter updates correctly
-	function startDictation() {
-		if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
-			alert('Speech recognition is not supported in this browser.');
-			dictationToggle.checked = false;
-			return;
+			voiceStatus.textContent = 'Voice recognition not available.  Try Chrome!';
+			dictationToggle.parentElement.style.display = 'none';
 		}
 
-		// Reset recognition if it was previously stopped
-		if (recognition) {
-			recognition.stop();
-			recognition = null;
+		// Font size change listener
+		fontSize.addEventListener('change', () => {
+			const selectedFontSize = fontSize.value;
+			localStorage.setItem('fontSize', selectedFontSize);
+			document.documentElement.style.setProperty('--font-size', selectedFontSize);
+		});
+
+		// Save the word seek range to localStorage
+		wordSeekRange.addEventListener('change', () => {
+			localStorage.setItem('wordSeekRange', wordSeekRange.value);
+		});
+
+		// Update presenter width on change
+		presenterWidth.addEventListener('change', () => {
+			const selectedWidth = presenterWidth.value;
+			localStorage.setItem('presenterWidth', selectedWidth); // Save to localStorage
+			presenter.style.width = selectedWidth; // Apply the width to the presenter
+		});
+
+		// Save content to local storage whenever the editor's content changes
+		editor.addEventListener('input', () => {
+			localStorage.setItem('autocueText', editor.value);
+			saveCursorPosition(); // Save cursor position on input
+		});
+
+		editor.addEventListener('mouseup', saveCursorPosition);
+		editor.addEventListener('keyup', saveCursorPosition);
+
+		function saveCursorPosition() {
+			editorCursorPosition = editor.selectionStart; // Update the cursor position
+			localStorage.setItem('editorCursorPosition', editorCursorPosition); // Save to localStorage
 		}
 
-		const context = getAudioContext();
-		if (context.state === 'suspended') {
-			context.resume().then(() => {
-				console.log('AudioContext resumed for dictation.');
-			}).catch((err) => {
-				console.error('Error resuming AudioContext:', err);
+		// Save the VU meter preference to localStorage
+		vuMeterToggle.addEventListener('change', () => {
+			const isVuMeterEnabled = vuMeterToggle.checked;
+			localStorage.setItem('vuMeterEnabled', isVuMeterEnabled);
+			toggleVuMeter(isVuMeterEnabled);
+		});
+
+		// Function to toggle the VU meter visibility
+		function toggleVuMeter(isEnabled) {
+			const vuMeterContainer = document.getElementById('vuMeterContainer');
+			if (isEnabled) {
+				vuMeterContainer.classList.remove('hidden');
+				vuMeterContainer.style.display = 'block';
+				vuMeterContainer.style.position = 'fixed';
+				vuMeterContainer.style.top = document.body.classList.contains('presentation') ? '0' : '40px'; // Adjust position
+
+				startVuMeter();
+			} else {
+				vuMeterContainer.classList.add('hidden');
+				vuMeterContainer.style.display = 'none';
+
+				// Stop the VU Meter
+				stopVuMeter();
+			}
+		}
+
+		function enterPresenter() {
+			mode = 'presenter'; // Set mode to presenter
+
+			// Force dark mode and black background in presentation mode
+			document.body.classList.add('dark', 'presentation');
+			document.getElementById('toolbar').style.display = 'none';
+			editor.style.display = 'none';
+			presenter.style.display = 'block';
+
+			// Show the VU meter at the top if enabled
+			const vuMeterContainer = document.getElementById('vuMeterContainer');
+			if (vuMeterToggle.checked) {
+				vuMeterContainer.style.display = 'block';
+				vuMeterContainer.style.position = 'fixed';
+				vuMeterContainer.style.top = '0'; // Pin to the top in presenter mode
+			}
+			else {
+				vuMeterContainer.style.display = 'none'; // Hide the VU meter if disabled
+			}
+
+			// Scale font size for presentation mode
+			const selectedFontSize = parseInt(fontSize.value, 10); // Parse font size as a number
+			presenter.style.fontSize = `${selectedFontSize * 1.5}px`; // Scale font size for presentation mode
+
+			// Split text into words and lines
+			const paragraphs = editor.value.split(/\n\n+/);
+			words = paragraphs.flatMap((p, i) => {
+				const lineWords = p.split(/\s+/).map(word => ({ word, line: i, isHeading: p.startsWith('#') }));
+				lineWords.push({ word: '\n', line: i, isHeading: p.startsWith('#') }); // Add a line break marker
+				return lineWords;
 			});
-		}
 
-		recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-		recognition.continuous = true;
-		recognition.interimResults = true;
-
-		let lastTranscript = '';
-
-		recognition.onresult = (event) => {
-			const transcript = Array.from(event.results)
-				.filter(result => result.isFinal)
-				.map(result => result[0].transcript)
-				.join('');
-
-			// Process the transcript for punctuation and formatting
-			let processedTranscript = transcript
-				.replace(/\bfull stop\b/gi, '.') // Replace "full stop" with "."
-				.replace(/\bquestion mark\b/gi, '?') // Replace "question mark" with "?"
-				.replace(/\bcomma\b/gi, ',') // Replace "comma" with ","
-				.replace(/\bexclamation mark\b/gi, '!') // Replace "exclamation mark" with "!"
-				.replace(/\bcolon\b/gi, ':') // Replace "colon" with ":"
-				.replace(/\bsemicolon\b/gi, ';') // Replace "semicolon" with ";"
-				.replace(/\bnew paragraph\b/gi, '\n\n') // Replace "new paragraph" with a double newline
-				.replace(/\s+([.,?!;:])/g, '$1') // Remove spaces before punctuation
-				.replace(/([.,?!;:])([^\s])/g, '$1 $2') // Add space after punctuation if missing
-				.replace(/^\s+|\s+$/g, '') // Trim leading/trailing spaces
-				.replace(/\bellipsis\b/gi, '...') // Replace "ellipsis" with "..."
-				.replace(/\bdot dot dot\b/gi, '...'); // Replace "dot dot dot" with "..."
-
-			processedTranscript = processedTranscript.replace(/(?:^|[.?!;:]\s+)([a-z])/g, (match, p1) => p1.toUpperCase());
-
-			// Check if the user said "delete last sentence"
-			if (processedTranscript.toLowerCase().includes('delete last sentence')) {
-				const content = editor.value.trim();
-				const lastSentenceIndex = content.lastIndexOf('.');
-				if (lastSentenceIndex !== -1) {
-					editor.value = content.substring(0, lastSentenceIndex + 1).trim(); // Keep everything up to the last period
-				} else {
-					editor.value = ''; // If no sentence is found, clear the editor
+			// Initialize the cursor based on the editor's cursor position
+			cursor = 0; // Default to the start
+			let charCount = 0; // Track character count to map to the word index
+			for (let i = 0; i < words.length; i++) {
+				charCount += words[i].word.length + 1; // Add word length + 1 for the space
+				if (charCount > editorCursorPosition) {
+					cursor = i; // Set the cursor to the corresponding word index
+					break;
 				}
-				localStorage.setItem('autocueText', editor.value); // Save updated content to local storage
-				return; // Exit early to avoid appending "delete last sentence" to the editor
 			}
 
-			// Ensure only new content is appended
-			const newContent = processedTranscript.replace(lastTranscript, '').trim();
+			// Render the presenter content
+			renderPresenter();
+		}
 
-			if (newContent) {
-				const cursorPosition = editor.selectionStart;
-				const textBeforeCursor = editor.value.substring(0, cursorPosition);
-				const textAfterCursor = editor.value.substring(editor.selectionEnd);
-
-				// Handle "new paragraph" on its own
-				if (newContent === '\n\n') {
-					editor.value = textBeforeCursor + '\n\n' + textAfterCursor;
-				}
-				// Handle standalone punctuation like "full stop" or "question mark"
-				else if (['.', '?', '!', ':', ';'].includes(newContent)) {
-					const trimmedTextBeforeCursor = textBeforeCursor.trimEnd();
-					// Avoid redundant punctuation
-					if (!trimmedTextBeforeCursor.endsWith(newContent)) {
-						editor.value = trimmedTextBeforeCursor + newContent + textAfterCursor;
-					}
-				}
-				// Handle regular text
-				else {
-					editor.value = textBeforeCursor + newContent + ' ' + textAfterCursor;
-				}
-
-				// Update the last transcript to the full processed transcript
-				lastTranscript = processedTranscript;
-
-				// Recalculate cursor position after insertion
-				const newCursorPosition = editor.value.length - textAfterCursor.length;
-				editor.setSelectionRange(newCursorPosition, newCursorPosition);
-
-				// Save updated content to local storage
-				localStorage.setItem('autocueText', editor.value);
+		function exitPresenter() {
+			// Set mode back to edit
+			mode = 'edit';
+			
+			// Restore user's dark mode preference in edit mode
+			document.body.classList.remove('presentation');
+			if (!prefersDark) {
+				document.body.classList.remove('dark');
 			}
-		};
 
-		recognition.start();
+			document.getElementById('toolbar').style.display = 'flex';
+			editor.style.display = 'block';
+			presenter.style.display = 'none';
 
-		console.log('Requesting microphone access...');
-		navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-			console.log('Microphone access granted:', stream);
-			audioContext = new AudioContext();
-			analyser = audioContext.createAnalyser();
-			const microphone = audioContext.createMediaStreamSource(stream);
-			console.log('Microphone connected to analyser:', microphone);
-			analyser.fftSize = 256;
-			microphone.connect(analyser);
-			console.log('Analyser connected:', analyser);
-			console.log('FFT Size:', analyser.fftSize);
-			console.log('Frequency Bin Count:', analyser.frequencyBinCount);
-
-			const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-		}).catch((err) => {
-			console.error('Error accessing microphone:', err);
-			alert('Microphone access is required for the VU meter to work.');
-			dictationToggle.checked = false;
-			dictationToggle.disabled = true; // Disable the toggle
-		});
-	}
-
-	function stopDictation() {
-		if (recognition) {
-			recognition.stop();
-			recognition = null;
-		}
-
-		if (audioContext) {
-			console.log('Closing AudioContext...');
-			audioContext.close();
-			audioContext = null;
-		}
-
-		if (microphone && microphone.mediaStream) {
-			console.log('Stopping microphone tracks...');
-			const tracks = microphone.mediaStream.getTracks();
-			tracks.forEach(track => track.stop());
-			microphone = null;
-		}
-
-		if (animationFrameId) {
-			console.log('Cancelling animation frame...');
-			cancelAnimationFrame(animationFrameId);
-			animationFrameId = null;
-		}
-
-		vuMeter.style.width = '0%'; // Reset the VU meter
-	}
-
-	function enterPresenter() {
-		// Force dark mode and black background in presentation mode
-		document.body.classList.add('dark', 'presentation');
-		document.getElementById('toolbar').style.display = 'none';
-		editor.style.display = 'none';
-		presenter.style.display = 'block';
-
-		// Show the VU meter at the top if enabled
-		const vuMeterContainer = document.getElementById('vuMeterContainer');
-		if (vuMeterToggle.checked) {
-			vuMeterContainer.style.display = 'block';
-			vuMeterContainer.style.position = 'fixed';
-			vuMeterContainer.style.top = '0'; // Pin to the top in presenter mode
-
-			// Resume AudioContext and start the VU Meter
-			if (!audioContext) {
-				audioContext = new AudioContext();
-			}
-			if (audioContext.state === 'suspended') {
-				audioContext.resume().then(() => {
-					console.log('AudioContext resumed successfully.');
-					startVuMeter();
-				}).catch((err) => {
-					console.error('Error resuming AudioContext:', err);
-				});
+			// Reset the VU meter position
+			const vuMeterContainer = document.getElementById('vuMeterContainer');
+			if (vuMeterToggle.checked) {
+				vuMeterContainer.style.display = 'block';
+				vuMeterContainer.style.position = 'fixed';
+				vuMeterContainer.style.top = '40px'; // Reset to below the toolbar in edit mode
 			} else {
-				startVuMeter();
+				// Stop the VU Meter if it's disabled
+				stopVuMeter();
+				vuMeterContainer.style.display = 'none';
 			}
-		}
 
-		// Scale font size for presentation mode
-		const selectedFontSize = parseInt(fontSize.value, 10); // Parse font size as a number
-		presenter.style.fontSize = `${selectedFontSize * 1.5}px`; // Scale font size for presentation mode
-
-		// Split text into words and lines
-		const paragraphs = editor.value.split(/\n\n+/);
-		words = paragraphs.flatMap((p, i) => {
-			const lineWords = p.split(/\s+/).map(word => ({ word, line: i, isHeading: p.startsWith('#') }));
-			lineWords.push({ word: '\n', line: i, isHeading: p.startsWith('#') }); // Add a line break marker
-			return lineWords;
-		});
-
-		// Initialize the cursor based on the editor's cursor position
-		cursor = 0; // Default to the start
-		let charCount = 0; // Track character count to map to the word index
-		for (let i = 0; i < words.length; i++) {
-			charCount += words[i].word.length + 1; // Add word length + 1 for the space
-			if (charCount > editorCursorPosition) {
-				cursor = i; // Set the cursor to the corresponding word index
-				break;
+			// Synchronize the editor's cursor position with the presenter's cursor
+			let charCount = 0;
+			for (let i = 0; i < words.length; i++) {
+				charCount += words[i].word.length + 1; // Add word length + 1 for the space
+				if (i === cursor) {
+					editorCursorPosition = charCount - words[i].word.length - 1; // Adjust to the start of the word
+					break;
+				}
 			}
+			editor.setSelectionRange(editorCursorPosition, editorCursorPosition); // Set the cursor position
+
+			// Scroll the editor to make the cursor visible
+			const lineHeight = parseFloat(window.getComputedStyle(editor).lineHeight);
+			const scrollTop = Math.max(0, editorCursorPosition * lineHeight - editor.clientHeight / 2);
+			editor.scrollTop = scrollTop;
 		}
 
 		// Render the presenter content
-		renderPresenter();
-	}
+		function renderPresenter() {
+			let html = '';
+			let isHeading = false;
 
-	function exitPresenter() {
-		// Restore user's dark mode preference in edit mode
-		document.body.classList.remove('presentation');
-		if (!prefersDark) {
-			document.body.classList.remove('dark');
-		}
-
-		document.getElementById('toolbar').style.display = 'flex';
-		editor.style.display = 'block';
-		presenter.style.display = 'none';
-
-		// Reset the VU meter position
-		const vuMeterContainer = document.getElementById('vuMeterContainer');
-		if (vuMeterToggle.checked) {
-			vuMeterContainer.style.display = 'block';
-			vuMeterContainer.style.position = 'fixed';
-			vuMeterContainer.style.top = '40px'; // Reset to below the toolbar in edit mode
-		} else {
-			// Stop the VU Meter if it's disabled
-			stopVuMeter();
-			vuMeterContainer.style.display = 'none';
-		}
-
-		// Stop speech recognition if active
-		if (recognition) {
-			recognition.stop();
-			recognition = null;
-		}
-
-		// Synchronize the editor's cursor position with the presenter's cursor
-		let charCount = 0;
-		for (let i = 0; i < words.length; i++) {
-			charCount += words[i].word.length + 1; // Add word length + 1 for the space
-			if (i === cursor) {
-				editorCursorPosition = charCount - words[i].word.length - 1; // Adjust to the start of the word
-				break;
-			}
-		}
-		editor.setSelectionRange(editorCursorPosition, editorCursorPosition); // Set the cursor position
-
-		// Scroll the editor to make the cursor visible
-		const lineHeight = parseFloat(window.getComputedStyle(editor).lineHeight);
-		const scrollTop = Math.max(0, editorCursorPosition * lineHeight - editor.clientHeight / 2);
-		editor.scrollTop = scrollTop;
-	}
-
-	// Render the presenter content
-	function renderPresenter() {
-		let html = '';
-		let isHeading = false;
-	
-		words.forEach((w, i) => {
-			if (w.isHeading) {
-				// Start a new heading block if it's a heading
-				if (!isHeading) {
-					html += `<span class="heading">`;
-					isHeading = true;
-				}
-				html += `${w.word.replace('#', '').trim()} `; // Strip the # symbol and add the word to the heading block
-			} else {
-				// Close the heading block if it ends
-				if (isHeading) {
-					html += `</span>`;
-					isHeading = false;
-				}
-	
-				// Render regular words
-				if (w.word === '\n') {
-					html += '<br>'; // Line break
-				} else if (i < cursor) {
-					html += `<span class="greyed-out">${w.word}</span> `;
-				} else if (i === cursor) {
-					html += `<span class="active-word">${w.word}</span> `;
+			words.forEach((w, i) => {
+				if (w.isHeading) {
+					// Start a new heading block if it's a heading
+					if (!isHeading) {
+						html += `<span class="heading">`;
+						isHeading = true;
+					}
+					html += `${w.word.replace('#', '').trim()} `; // Strip the # symbol and add the word to the heading block
 				} else {
-					html += `<span>${w.word}</span> `;
-				}
-			}
-		});
-	
-		// Close any open heading block
-		if (isHeading) {
-			html += `</span>`;
-		}
-	
-		presenter.innerHTML = html;
-	
-		// Scroll the active word into the vertical center of the screen
-		const activeWordElement = presenter.querySelector('.active-word');
-		if (activeWordElement) {
-	
-			// Check if the cursor is on the last line before a heading
-			const nextHeadingIndex = words.findIndex((w, index) => index > cursor && w.isHeading);
-			if (nextHeadingIndex !== -1) {
-				const isLastLineBeforeHeading = words[cursor]?.line === words[nextHeadingIndex]?.line - 1;
-				if (isLastLineBeforeHeading) {
-					// Scroll the last line to the top of the screen
-					activeWordElement.scrollIntoView({
-						behavior: 'smooth',
-						block: 'start', // Align the last line to the top of the screen
-					});
-					return; // Exit early to avoid centering the active word
-				}
-			}
-	
-			// Default behavior: center the active word vertically
-			activeWordElement.scrollIntoView({
-				behavior: 'smooth',
-				block: 'center', // Center the active word vertically
-			});
-		}
-	}
-
-	// Handle speech recognition
-	try {
-		recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-		recognition.continuous = true;
-		recognition.interimResults = true;
-
-		recognition.onresult = (e) => {
-			const transcript = e.results[e.results.length - 1][0].transcript.toLowerCase();
-			const spokenWords = transcript.split(/\s+/);
-
-			for (const spokenWord of spokenWords) {
-				if (!spokenWord) continue; // Skip empty words
-
-				// Skip headings
-				while (cursor < words.length && words[cursor].isHeading) {
-					cursor++;
-				}
-
-				// Check if the spoken word matches the current word
-				if (cursor < words.length && spokenWord === words[cursor].word.toLowerCase()) {
-					cursor++; // Move to the next word
-				} else {
-					// Look ahead or behind for a match with forward preference
-					let found = false;
-					let bestMatch = null;
-					let bestMatchOffset = null;
-
-					// Get the range from the dropdown
-					const seekRange = parseInt(wordSeekRange.value, 10);
-
-					for (let offset = 1; offset <= seekRange; offset++) {
-						// Look ahead
-						if (cursor + offset < words.length && spokenWord === words[cursor + offset].word.toLowerCase()) {
-							const forwardWeight = 1 / offset; // Weight decreases with distance
-							if (!bestMatch || forwardWeight > bestMatch.weight) {
-								bestMatch = { position: cursor + offset, weight: forwardWeight };
-								bestMatchOffset = offset;
-							}
-						}
-						// Look behind
-						if (cursor - offset >= 0 && spokenWord === words[cursor - offset].word.toLowerCase()) {
-							const backwardWeight = 1 / (offset * 2); // Lower weight for backward matches
-							if (!bestMatch || backwardWeight > bestMatch.weight) {
-								bestMatch = { position: cursor - offset, weight: backwardWeight };
-								bestMatchOffset = -offset;
-							}
-						}
+					// Close the heading block if it ends
+					if (isHeading) {
+						html += `</span>`;
+						isHeading = false;
 					}
 
-					if (bestMatch) {
-						cursor = bestMatch.position; // Move to the best match
-						found = true;
+					// Render regular words
+					if (w.word === '\n') {
+						html += '<br>'; // Line break
+					} else if (i < cursor) {
+						html += `<span class="greyed-out">${w.word}</span> `;
+					} else if (i === cursor) {
+						html += `<span class="active-word">${w.word}</span> `;
+					} else {
+						html += `<span>${w.word}</span> `;
+					}
+				}
+			});
+
+			// Close any open heading block
+			if (isHeading) {
+				html += `</span>`;
+			}
+
+			presenter.innerHTML = html;
+
+			// Scroll the active word into the vertical center of the screen
+			const activeWordElement = presenter.querySelector('.active-word');
+			if (activeWordElement) {
+
+				// Check if the cursor is on the last line before a heading
+				const nextHeadingIndex = words.findIndex((w, index) => index > cursor && w.isHeading);
+				if (nextHeadingIndex !== -1) {
+					const isLastLineBeforeHeading = words[cursor]?.line === words[nextHeadingIndex]?.line - 1;
+					if (isLastLineBeforeHeading) {
+						// Scroll the last line to the top of the screen
+						activeWordElement.scrollIntoView({
+							behavior: 'smooth',
+							block: 'start', // Align the last line to the top of the screen
+						});
+						return; // Exit early to avoid centering the active word
+					}
+				}
+
+				// Default behavior: center the active word vertically
+				activeWordElement.scrollIntoView({
+					behavior: 'smooth',
+					block: 'center', // Center the active word vertically
+				});
+			}
+		}
+
+		function exitPresenter() {
+			// Restore user's dark mode preference in edit mode
+			document.body.classList.remove('presentation');
+			if (!prefersDark) {
+				document.body.classList.remove('dark');
+			}
+
+			document.getElementById('toolbar').style.display = 'flex';
+			editor.style.display = 'block';
+			presenter.style.display = 'none';
+
+			// Reset the VU meter position
+			const vuMeterContainer = document.getElementById('vuMeterContainer');
+			if (vuMeterToggle.checked) {
+				vuMeterContainer.style.display = 'block';
+				vuMeterContainer.style.position = 'fixed';
+				vuMeterContainer.style.top = '40px'; // Reset to below the toolbar in edit mode
+			} else {
+				// Stop the VU Meter if it's disabled
+				stopVuMeter();
+				vuMeterContainer.style.display = 'none';
+			}
+
+			// Synchronize the editor's cursor position with the presenter's cursor
+			let charCount = 0;
+			for (let i = 0; i < words.length; i++) {
+				charCount += words[i].word.length + 1; // Add word length + 1 for the space
+				if (i === cursor) {
+					editorCursorPosition = charCount - words[i].word.length - 1; // Adjust to the start of the word
+					break;
+				}
+			}
+			editor.setSelectionRange(editorCursorPosition, editorCursorPosition); // Set the cursor position
+
+			// Scroll the editor to make the cursor visible
+			const lineHeight = parseFloat(window.getComputedStyle(editor).lineHeight);
+			const scrollTop = Math.max(0, editorCursorPosition * lineHeight - editor.clientHeight / 2);
+			editor.scrollTop = scrollTop;
+		}
+
+		// Consolidated keydown event handler
+		document.addEventListener('keydown', (event) => {
+			// Always exit presentation mode with Escape
+			if (event.key === 'Escape') {
+				exitPresenter();
+				return;
+			}
+
+			// Enter presentation mode with Ctrl+Enter
+			if (event.ctrlKey && event.key === 'Enter') {
+				enterPresenter();
+				return;
+			}
+
+			// Handle navigation keys in presentation mode
+			if (presenter.style.display !== 'none') {
+				switch (event.key) {
+					case 'ArrowRight': // Move forward one word
+						if (cursor < words.length - 1) cursor++;
+						break;
+
+					case 'ArrowLeft': // Move backward one word
+						if (cursor > 0) cursor--;
+						break;
+
+					case 'ArrowDown': { // Move to the beginning of the next line
+						const currentLine = words[cursor]?.line;
+						const nextLineIndex = words.findIndex(w => w.line === currentLine + 1);
+						if (nextLineIndex !== -1) {
+							cursor = nextLineIndex;
+						} else {
+							cursor = words.length - 1; // Move to the last word if no next line
+						}
+						break;
+					}
+
+					case 'ArrowUp': { // Move to the beginning of the previous line
+						const currentLine = words[cursor]?.line;
+						let prevLineIndex = words.findIndex(w => w.line === currentLine - 1);
+
+						// Skip over titles
+						while (prevLineIndex !== -1 && words[prevLineIndex]?.isHeading) {
+							prevLineIndex = words.findIndex(w => w.line === words[prevLineIndex]?.line - 1);
+						}
+
+						if (prevLineIndex !== -1) {
+							cursor = prevLineIndex;
+						} else {
+							cursor = 0; // Move to the first word if no previous line
+						}
+						break;
+					}
+
+					case 'Home': // Move to the start of the text
+						cursor = 0;
+						break;
+
+					case 'End': // Move to the end of the text
+						cursor = words.length - 1;
+						break;
+
+					case 'PageDown': { // Jump to the next heading
+						const nextHeadingIndex = words.findIndex((w, index) => index > cursor && w.isHeading);
+						if (nextHeadingIndex !== -1) {
+							cursor = nextHeadingIndex;
+						} else {
+							cursor = words.length - 1; // Move to the last word if no more headings
+						}
+						break;
+					}
+
+					case 'PageUp': { // Jump to the previous heading
+						const prevHeadingIndex = [...words]
+							.reverse()
+							.findIndex((w, index) => words.length - 1 - index < cursor && w.isHeading);
+						if (prevHeadingIndex !== -1) {
+							cursor = words.length - 1 - prevHeadingIndex;
+						} else {
+							cursor = 0; // Move to the first word if no previous headings
+						}
+						break;
 					}
 				}
 
@@ -762,232 +706,250 @@
 				while (cursor < words.length && words[cursor].isHeading) {
 					cursor++;
 				}
-			}
 
-			// Update the presenter display
-			renderPresenter();
-		};
+				// Update the presenter display
+				renderPresenter();
 
-		recognition.start();
-	} catch (e) {
-		console.warn('Speech recognition not supported or blocked:', e);
-	}
-
-	function exitPresenter() {
-		// Restore user's dark mode preference in edit mode
-		document.body.classList.remove('presentation');
-		if (!prefersDark) {
-			document.body.classList.remove('dark');
-		}
-
-		document.getElementById('toolbar').style.display = 'flex';
-		editor.style.display = 'block';
-		presenter.style.display = 'none';
-
-		// Reset the VU meter position
-		const vuMeterContainer = document.getElementById('vuMeterContainer');
-		if (vuMeterToggle.checked) {
-			vuMeterContainer.style.display = 'block';
-			vuMeterContainer.style.position = 'fixed';
-			vuMeterContainer.style.top = '40px'; // Reset to below the toolbar in edit mode
-		} else {
-			// Stop the VU Meter if it's disabled
-			stopVuMeter();
-			vuMeterContainer.style.display = 'none';
-		}
-
-		// Stop speech recognition if active
-		if (recognition) {
-			recognition.stop();
-			recognition = null;
-		}
-
-		// Synchronize the editor's cursor position with the presenter's cursor
-		let charCount = 0;
-		for (let i = 0; i < words.length; i++) {
-			charCount += words[i].word.length + 1; // Add word length + 1 for the space
-			if (i === cursor) {
-				editorCursorPosition = charCount - words[i].word.length - 1; // Adjust to the start of the word
-				break;
-			}
-		}
-		editor.setSelectionRange(editorCursorPosition, editorCursorPosition); // Set the cursor position
-
-		// Scroll the editor to make the cursor visible
-		const lineHeight = parseFloat(window.getComputedStyle(editor).lineHeight);
-		const scrollTop = Math.max(0, editorCursorPosition * lineHeight - editor.clientHeight / 2);
-		editor.scrollTop = scrollTop;
-	}
-
-	// Consolidated keydown event handler
-	document.addEventListener('keydown', (event) => {
-		// Always exit presentation mode with Escape
-		if (event.key === 'Escape') {
-			exitPresenter();
-			return;
-		}
-
-		// Enter presentation mode with Ctrl+Enter
-		if (event.ctrlKey && event.key === 'Enter') {
-			enterPresenter();
-			return;
-		}
-
-		// Handle navigation keys in presentation mode
-		if (presenter.style.display !== 'none') {
-			switch (event.key) {
-				case 'ArrowRight': // Move forward one word
-					if (cursor < words.length - 1) cursor++;
-					break;
-
-				case 'ArrowLeft': // Move backward one word
-					if (cursor > 0) cursor--;
-					break;
-
-				case 'ArrowDown': { // Move to the beginning of the next line
-					const currentLine = words[cursor]?.line;
-					const nextLineIndex = words.findIndex(w => w.line === currentLine + 1);
-					if (nextLineIndex !== -1) {
-						cursor = nextLineIndex;
-					} else {
-						cursor = words.length - 1; // Move to the last word if no next line
-					}
-					break;
-				}
-
-				case 'ArrowUp': { // Move to the beginning of the previous line
-					const currentLine = words[cursor]?.line;
-					let prevLineIndex = words.findIndex(w => w.line === currentLine - 1);
-
-					// Skip over titles
-					while (prevLineIndex !== -1 && words[prevLineIndex]?.isHeading) {
-						prevLineIndex = words.findIndex(w => w.line === words[prevLineIndex]?.line - 1);
-					}
-
-					if (prevLineIndex !== -1) {
-						cursor = prevLineIndex;
-					} else {
-						cursor = 0; // Move to the first word if no previous line
-					}
-					break;
-				}
-
-				case 'Home': // Move to the start of the text
-					cursor = 0;
-					break;
-
-				case 'End': // Move to the end of the text
-					cursor = words.length - 1;
-					break;
-
-				case 'PageDown': { // Jump to the next heading
-					const nextHeadingIndex = words.findIndex((w, index) => index > cursor && w.isHeading);
-					if (nextHeadingIndex !== -1) {
-						cursor = nextHeadingIndex;
-					} else {
-						cursor = words.length - 1; // Move to the last word if no more headings
-					}
-					break;
-				}
-
-				case 'PageUp': { // Jump to the previous heading
-					const prevHeadingIndex = [...words]
-						.reverse()
-						.findIndex((w, index) => words.length - 1 - index < cursor && w.isHeading);
-					if (prevHeadingIndex !== -1) {
-						cursor = words.length - 1 - prevHeadingIndex;
-					} else {
-						cursor = 0; // Move to the first word if no previous headings
-					}
-					break;
+				// Scroll the active word into the vertical center of the screen
+				const activeWordElement = presenter.querySelector('.active-word');
+				if (activeWordElement) {
+					activeWordElement.scrollIntoView({
+						behavior: 'smooth', // Smooth scrolling
+						block: 'center', // Center the active word vertically
+					});
 				}
 			}
+		});
 
-			// Skip headings after moving the cursor
-			while (cursor < words.length && words[cursor].isHeading) {
-				cursor++;
+		// Load preferences and textarea content from localStorage
+		window.addEventListener('DOMContentLoaded', () => {
+
+			let isVuMeterEnabled = false;
+
+			// Load textarea content
+			const savedContent = localStorage.getItem('autocueText');
+			if (savedContent !== null) {
+				editor.value = savedContent; // Set the textarea content
 			}
 
-			// Update the presenter display
-			renderPresenter();
-
-			// Scroll the active word into the vertical center of the screen
-			const activeWordElement = presenter.querySelector('.active-word');
-			if (activeWordElement) {
-				activeWordElement.scrollIntoView({
-					behavior: 'smooth', // Smooth scrolling
-					block: 'center', // Center the active word vertically
-				});
+			// Load font size preference
+			const savedFontSize = localStorage.getItem('fontSize');
+			if (savedFontSize) {
+				fontSize.value = savedFontSize;
+				document.documentElement.style.setProperty('--font-size', savedFontSize);
 			}
-		}
-	});
 
-	// Load preferences and textarea content from localStorage
-	window.addEventListener('DOMContentLoaded', () => {
-		// Load textarea content
-		const savedContent = localStorage.getItem('autocueText');
-		if (savedContent !== null) {
-			editor.value = savedContent; // Set the textarea content
-		}
+			// Load cursor position
+			const savedCursorPosition = localStorage.getItem('editorCursorPosition');
+			if (savedCursorPosition !== null) {
+				editorCursorPosition = parseInt(savedCursorPosition, 10);
+				editor.setSelectionRange(editorCursorPosition, editorCursorPosition); // Restore cursor position
+			}
 
-		// Load font size preference
-		const savedFontSize = localStorage.getItem('fontSize');
-		if (savedFontSize) {
-			fontSize.value = savedFontSize;
-			document.documentElement.style.setProperty('--font-size', savedFontSize);
-		}
+			// Load the word seek range from localStorage
+			const savedWordSeekRange = localStorage.getItem('wordSeekRange');
+			if (savedWordSeekRange) {
+				wordSeekRange.value = savedWordSeekRange;
+			}
 
-		// Load cursor position
-		const savedCursorPosition = localStorage.getItem('editorCursorPosition');
-		if (savedCursorPosition !== null) {
-			editorCursorPosition = parseInt(savedCursorPosition, 10);
-			editor.setSelectionRange(editorCursorPosition, editorCursorPosition); // Restore cursor position
-		}
+			// Load the VU meter preference
+			const savedVuMeterEnabled = localStorage.getItem('vuMeterEnabled');
+			if (savedVuMeterEnabled !== null) {
+				isVuMeterEnabled = savedVuMeterEnabled === 'true';
+				vuMeterToggle.checked = isVuMeterEnabled; // Set the toggle state
+			}
 
-		// Load the word seek range from localStorage
-		const savedWordSeekRange = localStorage.getItem('wordSeekRange');
-		if (savedWordSeekRange) {
-			wordSeekRange.value = savedWordSeekRange;
-		}
+			// Load presenter width preference
+			const savedPresenterWidth = localStorage.getItem('presenterWidth');
+			if (savedPresenterWidth) {
+				presenterWidth.value = savedPresenterWidth; // Set the dropdown value
+				presenter.style.width = savedPresenterWidth; // Apply the width to the presenter
+			} else {
+				presenter.style.width = '100%'; // Default to 100% if no value is saved
+			}
 
-		// Load the VU meter preference
-		const savedVuMeterEnabled = localStorage.getItem('vuMeterEnabled');
-		if (savedVuMeterEnabled !== null) {
-			const isVuMeterEnabled = savedVuMeterEnabled === 'true';
-			vuMeterToggle.checked = isVuMeterEnabled; // Set the toggle state
-			toggleVuMeter(isVuMeterEnabled); // Apply the VU Meter state
-		}
+			console.log('Requesting microphone access...');
+			navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+				globalMediaStream = stream; // Store the media stream globally
+				console.log('Microphone access granted:', stream);
+				audioContext = new AudioContext();
+				analyser = audioContext.createAnalyser();
+				microphone = audioContext.createMediaStreamSource(stream);
+				console.log('Microphone connected to analyser:', microphone);
+				analyser.fftSize = 256;
+				microphone.connect(analyser);
+				console.log('Analyser connected:', analyser);
+				console.log('FFT Size:', analyser.fftSize);
+				console.log('Frequency Bin Count:', analyser.frequencyBinCount);
 
-		// Load presenter width preference
-		const savedPresenterWidth = localStorage.getItem('presenterWidth');
-		if (savedPresenterWidth) {
-			presenterWidth.value = savedPresenterWidth; // Set the dropdown value
-			presenter.style.width = savedPresenterWidth; // Apply the width to the presenter
-		} else {
-			presenter.style.width = '100%'; // Default to 100% if no value is saved
-		}
-	});
+				const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-	let vuMeterAnimationFrameId = null;
+				// Initialize SpeechRecognition
+				if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+					recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+					recognition.continuous = true;
+					recognition.interimResults = true;
 
-	function startVuMeter() {
-		const context = getAudioContext();
+					let lastTranscript = '';
 
-		if (context.state === 'suspended') {
-			context.resume().then(() => {
-				console.log('AudioContext resumed for VU Meter.');
+					recognition.onresult = (event) => {
+
+						console.log('Speech recognition result in ' + mode + ':', event.results);
+						
+						// Do different things, depending on the mode
+						if (mode == 'edit') {
+
+							const transcript = Array.from(event.results)
+								.filter(result => result.isFinal)
+								.map(result => result[0].transcript)
+								.join('');
+
+							// Process the transcript for punctuation and formatting
+							let processedTranscript = transcript
+								.replace(/\bfull stop\b/gi, '.') // Replace "full stop" with "."
+								.replace(/\bquestion mark\b/gi, '?') // Replace "question mark" with "?"
+								.replace(/\bcomma\b/gi, ',') // Replace "comma" with ","
+								.replace(/\bexclamation mark\b/gi, '!') // Replace "exclamation mark" with "!"
+								.replace(/\bcolon\b/gi, ':') // Replace "colon" with ":"
+								.replace(/\bsemicolon\b/gi, ';') // Replace "semicolon" with ";"
+								.replace(/\bnew paragraph\b/gi, '\n\n') // Replace "new paragraph" with a double newline
+								.replace(/\s+([.,?!;:])/g, '$1') // Remove spaces before punctuation
+								.replace(/([.,?!;:])([^\s])/g, '$1 $2') // Add space after punctuation if missing
+								.replace(/^\s+|\s+$/g, '') // Trim leading/trailing spaces
+								.replace(/\bellipsis\b/gi, '...') // Replace "ellipsis" with "..."
+								.replace(/\bdot dot dot\b/gi, '...'); // Replace "dot dot dot" with "..."
+
+							processedTranscript = processedTranscript.replace(/(?:^|[.?!;:]\s+)([a-z])/g, (match, p1) => p1.toUpperCase());
+
+							// Ensure only new content is appended when dictation is enabled.
+							const newContent = processedTranscript.replace(lastTranscript, '').trim();
+
+							if (dictationToggle.checked && newContent) {
+								const cursorPosition = editor.selectionStart;
+								const textBeforeCursor = editor.value.substring(0, cursorPosition);
+								const textAfterCursor = editor.value.substring(editor.selectionEnd);
+
+								// Handle "new paragraph" on its own
+								if (newContent === '\n\n') {
+									editor.value = textBeforeCursor + '\n\n' + textAfterCursor;
+								}
+								// Handle standalone punctuation like "full stop" or "question mark"
+								else if (['.', '?', '!', ':', ';'].includes(newContent)) {
+									const trimmedTextBeforeCursor = textBeforeCursor.trimEnd();
+									// Avoid redundant punctuation
+									if (!trimmedTextBeforeCursor.endsWith(newContent)) {
+										editor.value = trimmedTextBeforeCursor + newContent + textAfterCursor;
+									}
+								}
+								// Handle regular text
+								else {
+									editor.value = textBeforeCursor + newContent + ' ' + textAfterCursor;
+								}
+
+								// Update the last transcript to the full processed transcript
+								lastTranscript = processedTranscript;
+
+								// Recalculate cursor position after insertion
+								const newCursorPosition = editor.value.length - textAfterCursor.length;
+								editor.setSelectionRange(newCursorPosition, newCursorPosition);
+
+								// Save updated content to local storage
+								localStorage.setItem('autocueText', editor.value);
+							}
+						}
+						else {
+							const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
+							const spokenWords = transcript.split(/\s+/);
+
+							for (const spokenWord of spokenWords) {
+								if (!spokenWord) continue; // Skip empty words
+
+								// Skip headings
+								while (cursor < words.length && words[cursor].isHeading) {
+									cursor++;
+								}
+
+								// Check if the spoken word matches the current word
+								if (cursor < words.length && spokenWord === words[cursor].word.toLowerCase()) {
+									cursor++; // Move to the next word
+								} else {
+									// Look ahead or behind for a match with forward preference
+									let found = false;
+									let bestMatch = null;
+									let bestMatchOffset = null;
+
+									// Get the range from the dropdown
+									const seekRange = parseInt(wordSeekRange.value, 10);
+
+									for (let offset = 1; offset <= seekRange; offset++) {
+										// Look ahead
+										if (cursor + offset < words.length && spokenWord === words[cursor + offset].word.toLowerCase()) {
+											const forwardWeight = 1 / offset; // Weight decreases with distance
+											if (!bestMatch || forwardWeight > bestMatch.weight) {
+												bestMatch = { position: cursor + offset, weight: forwardWeight };
+												bestMatchOffset = offset;
+											}
+										}
+										// Look behind
+										if (cursor - offset >= 0 && spokenWord === words[cursor - offset].word.toLowerCase()) {
+											const backwardWeight = 1 / (offset * 2); // Lower weight for backward matches
+											if (!bestMatch || backwardWeight > bestMatch.weight) {
+												bestMatch = { position: cursor - offset, weight: backwardWeight };
+												bestMatchOffset = -offset;
+											}
+										}
+									}
+
+									if (bestMatch) {
+										cursor = bestMatch.position; // Move to the best match
+										found = true;
+									}
+								}
+
+								// Skip headings after moving the cursor
+								while (cursor < words.length && words[cursor].isHeading) {
+									cursor++;
+								}
+							}
+
+							// Update the presenter display
+							renderPresenter();
+						}
+					};
+
+					recognition.start();
+
+					// Apply the preferred VU Meter state
+					toggleVuMeter(isVuMeterEnabled);
+				} else {
+					console.warn('Speech recognition not supported in this browser.');
+					dictationToggle.parentElement.style.display = 'none'; // Hide dictation toggle if unsupported
+					toggleVuMeter(false);
+				}
+
 			}).catch((err) => {
-				console.error('Error resuming AudioContext:', err);
+				console.error('Error accessing microphone:', err);
+				alert('Microphone access is required for the VU meter to work.');
+				dictationToggle.checked = false;
+				dictationToggle.disabled = true; // Disable the toggle
 			});
+
+		});
+
+		let vuMeterAnimationFrameId = null;
+
+		function startVuMeter() {
+			// If the microphone is already connected, skip requesting access
+			if (microphone) {
+				console.log('Microphone already connected. Starting VU Meter...');
+				startVuMeterAnimation();
+				return;
+			}
+
+			console.error('No microphone access available.');
 		}
 
-		navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-			analyser = context.createAnalyser();
-			microphone = context.createMediaStreamSource(stream);
-
-			analyser.fftSize = 256;
-			microphone.connect(analyser);
-
+		function startVuMeterAnimation() {
 			const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
 			function updateVuMeter() {
@@ -1002,36 +964,26 @@
 			}
 
 			updateVuMeter();
-		}).catch((err) => {
-			console.error('Error accessing microphone for VU Meter:', err);
-			alert('Microphone access is required for the VU Meter to work.');
-			vuMeterToggle.checked = false;
-			toggleVuMeter(false);
-		});
-	}
-
-	function stopVuMeter() {
-		if (vuMeterAnimationFrameId) {
-			cancelAnimationFrame(vuMeterAnimationFrameId);
-			vuMeterAnimationFrameId = null;
 		}
 
-		if (audioContext && audioContext.state !== 'suspended') {
-			audioContext.suspend().then(() => {
-				console.log('AudioContext suspended for VU Meter.');
-			}).catch((err) => {
-				console.error('Error suspending AudioContext:', err);
-			});
-		}
+		function stopVuMeter() {
+			if (vuMeterAnimationFrameId) {
+				cancelAnimationFrame(vuMeterAnimationFrameId);
+				vuMeterAnimationFrameId = null;
+			}
 
-		if (microphone && microphone.mediaStream) {
-			const tracks = microphone.mediaStream.getTracks();
-			tracks.forEach(track => track.stop());
-			microphone = null;
-		}
+			if (audioContext && audioContext.state !== 'suspended') {
+				audioContext.suspend().then(() => {
+					console.log('AudioContext suspended for VU Meter.');
+				}).catch((err) => {
+					console.error('Error suspending AudioContext:', err);
+				});
+			}
 
-		vuMeter.style.width = '100%'; // Reset the VU Meter
-	}
+			// Do not stop the microphone tracks unless explicitly needed
+			vuMeter.style.width = '100%'; // Reset the VU Meter
+		}
 	</script>
 </body>
+
 </html>
