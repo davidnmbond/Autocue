@@ -1,3 +1,7 @@
+To use Autocue, visit https://davidnmbond.github.io/Autocue/
+
+It's free and open source!
+
 ```
 #Introduction
 
