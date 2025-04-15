@@ -690,13 +690,26 @@
 					}
 
 					case 'PageUp': { // Jump to the previous heading
-						const prevHeadingIndex = [...words]
-							.reverse()
-							.findIndex((w, index) => words.length - 1 - index < cursor && w.isHeading);
+						let prevHeadingIndex = -1;
+
+						// Search for the previous heading before the current cursor position
+						for (let i = cursor - 1; i >= 0; i--) {
+							if (words[i].isHeading) {
+								prevHeadingIndex = i;
+
+								// If the cursor is already at a heading, skip to the next previous heading
+								if (cursor === i) {
+									continue;
+								}
+
+								break;
+							}
+						}
+
 						if (prevHeadingIndex !== -1) {
-							cursor = words.length - 1 - prevHeadingIndex;
+							cursor = prevHeadingIndex; // Move to the previous heading
 						} else {
-							cursor = 0; // Move to the first word if no previous headings
+							cursor = 0; // Move to the start if no previous headings are found
 						}
 						break;
 					}
@@ -914,6 +927,7 @@
 							// Update the presenter display
 							renderPresenter();
 						}
+
 					};
 
 					recognition.start();
