@@ -275,6 +275,21 @@
 			background-color: black;
 			/* Ensure the entire viewport has a black background */
 		}
+
+		.bold-word {
+			color: yellow;
+			font-weight: bold;
+		}
+
+		.bold-active-word {
+			color: yellow;
+			font-weight: bold;
+		}
+
+		.bold-greyed-out {
+			color: grey;
+			font-weight: bold;
+		}
 	</style>
 </head>
 
@@ -532,15 +547,34 @@
 						isHeading = false;
 					}
 
-					// Render regular words
+					 // Check if the word is in the form *word*
+					const isBoldWord = w.word.startsWith('*') && w.word.endsWith('*');
+					const cleanWord = isBoldWord ? w.word.slice(1, -1) : w.word; // Remove the asterisks
+
+					// Render regular words or bold words
 					if (w.word === '\n') {
 						html += '<br>'; // Line break
 					} else if (i < cursor) {
-						html += `<span class="greyed-out">${w.word}</span> `;
+						// Words that have been passed
+						if (isBoldWord) {
+							html += `<span class="bold-greyed-out">${cleanWord}</span> `;
+						} else {
+							html += `<span class="greyed-out">${w.word}</span> `;
+						}
 					} else if (i === cursor) {
-						html += `<span class="active-word">${w.word}</span> `;
+						// Active word
+						if (isBoldWord) {
+							html += `<span class="bold-active-word">${cleanWord}</span> `;
+						} else {
+							html += `<span class="active-word">${w.word}</span> `;
+						}
 					} else {
-						html += `<span>${w.word}</span> `;
+						// Words that haven't been reached yet
+						if (isBoldWord) {
+							html += `<span class="bold-word">${cleanWord}</span> `;
+						} else {
+							html += `<span>${w.word}</span> `;
+						}
 					}
 				}
 			});
@@ -555,22 +589,6 @@
 			// Scroll the active word into the vertical center of the screen
 			const activeWordElement = presenter.querySelector('.active-word');
 			if (activeWordElement) {
-
-				// Check if the cursor is on the last line before a heading
-				const nextHeadingIndex = words.findIndex((w, index) => index > cursor && w.isHeading);
-				if (nextHeadingIndex !== -1) {
-					const isLastLineBeforeHeading = words[cursor]?.line === words[nextHeadingIndex]?.line - 1;
-					if (isLastLineBeforeHeading) {
-						// Scroll the last line to the top of the screen
-						activeWordElement.scrollIntoView({
-							behavior: 'smooth',
-							block: 'start', // Align the last line to the top of the screen
-						});
-						return; // Exit early to avoid centering the active word
-					}
-				}
-
-				// Default behavior: center the active word vertically
 				activeWordElement.scrollIntoView({
 					behavior: 'smooth',
 					block: 'center', // Center the active word vertically
