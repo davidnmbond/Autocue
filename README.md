@@ -35,7 +35,7 @@ In edit mode, you can configure several settings to match your preferences:
 
 • Adjust the auto-locate word range, which controls how many words the system scans to keep your position in sync.
 
-• Set the screen usage percentage to control how much of the screen the autocue occupies.
+• Set the screen usage percentage to control how much of the screen Autocue occupies.
 
 • Choose whether to see the V U meter, which shows your microphone input level and will display in both edit and presentation modes.
 
