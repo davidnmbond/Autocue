@@ -1,15 +1,21 @@
 ```
 #Introduction
 
-Hello everybody.  Welcome to Autocue.
+Hello everybody.  Welcome to *Autocue*
 
-This tutorial will demonstrate how to use Autocue effectively, including both keyboard controls and configuration options in edit mode.
+This tutorial will demonstrate how to use *Autocue* effectively, including both keyboard controls and configuration options in edit mode.
+
+The first screen you will see is the edit mode.  Here, you can edit your script and add headlines and emphasis.  Press return twice after headings and between paragraphs.
 
 #Presentation Mode
 
 To enter presentation mode, press Ctrl Enter.  The system will start the presentation from where you were last editing.
 
-This will put Autocue into full screen, with larger text and smooth scrolling.
+This will put *Autocue* into full screen, with larger text and smooth scrolling.
+
+Here, you can just speak the script out loud and *Autocue* will follow you as you go.
+
+Words will grey out after you've said them, and the next word to speak is shown in green.
 
 When reading, try to keep your gaze near the centre of the screen.  This will enable a more natural delivery.
 
@@ -35,7 +41,7 @@ In edit mode, you can configure several settings to match your preferences:
 
 • Adjust the auto-locate word range, which controls how many words the system scans to keep your position in sync.
 
-• Set the screen usage percentage to control how much of the screen Autocue occupies.
+• Set the screen usage percentage to control how much of the screen *Autocue* occupies.
 
 • Choose whether to see the V U meter, which shows your microphone input level and will display in both edit and presentation modes.
 
@@ -65,7 +71,7 @@ If you want to see this tutorial again, simply delete all your text and reload t
 
 That's it !
 
-Now you're ready to practice your delivery, tweak the settings to your liking, and feel confident using Autocue for any speaking scenario.
+Now you're ready to practice your delivery, tweak the settings to your liking, and feel confident using *Autocue* for any speaking scenario.
 
 #END
 ```
