@@ -876,8 +876,7 @@
 									// Look ahead or behind for a match with forward preference
 									let found = false;
 									let bestMatch = null;
-									let bestMatchOffset = null;
-
+									
 									// Get the range from the dropdown
 									const seekRange = parseInt(wordSeekRange.value, 10);
 
@@ -901,7 +900,7 @@
 									}
 
 									if (bestMatch) {
-										cursor = bestMatch.position; // Move to the best match
+										cursor = bestMatch.position + 1; // Move to the best match
 										found = true;
 									}
 								}
@@ -939,27 +938,17 @@
 		let vuMeterAnimationFrameId = null;
 
 		function startVuMeter() {
-			// If the microphone is already connected, skip requesting access
-			if (microphone) {
-				console.log('Microphone already connected. Starting VU Meter...');
-				startVuMeterAnimation();
-				return;
-			}
-
-			console.error('No microphone access available.');
-		}
-
-		function startVuMeterAnimation() {
 			const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
 			function updateVuMeter() {
-				analyser.getByteFrequencyData(dataArray);
-				const volume = Math.max(...dataArray);
-				const percentage = (volume / 255) * 100;
+				if(analyser) {
+					analyser.getByteFrequencyData(dataArray);
+					const volume = Math.max(...dataArray);
+					const percentage = (volume / 255) * 100;
 
-				// Shrink the black overlay based on the volume percentage
-				vuMeter.style.width = `${100 - percentage}%`;
-
+					// Shrink the black overlay based on the volume percentage
+					vuMeter.style.width = `${100 - percentage}%`;
+				}
 				vuMeterAnimationFrameId = requestAnimationFrame(updateVuMeter);
 			}
 
@@ -972,15 +961,6 @@
 				vuMeterAnimationFrameId = null;
 			}
 
-			if (audioContext && audioContext.state !== 'suspended') {
-				audioContext.suspend().then(() => {
-					console.log('AudioContext suspended for VU Meter.');
-				}).catch((err) => {
-					console.error('Error suspending AudioContext:', err);
-				});
-			}
-
-			// Do not stop the microphone tracks unless explicitly needed
 			vuMeter.style.width = '100%'; // Reset the VU Meter
 		}
 	</script>
