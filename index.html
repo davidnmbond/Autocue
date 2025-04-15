@@ -646,10 +646,10 @@
 
 		function smoothScrollTo(targetElement) {
 			const presenter = document.getElementById('presenter');
-			const targetPosition = targetElement.offsetTop - presenter.clientHeight / 2 + targetElement.clientHeight / 2;
+			const targetPosition = targetElement.offsetTop - presenter.clientHeight / 3 + targetElement.clientHeight / 2;
 			const startPosition = presenter.scrollTop;
 			const distance = targetPosition - startPosition;
-			const duration = 2000; // Increase duration to 2000ms (2 seconds) for a slower scroll
+			const duration = 2000; // Duration of the scroll in milliseconds
 			let startTime = null;
 
 			function easeOutQuad(t) {
@@ -1188,10 +1188,10 @@ Now you're ready to practice your delivery, tweak the settings to your liking, a
 
 		function smoothScrollTo(targetElement) {
 			const presenter = document.getElementById('presenter');
-			const targetPosition = targetElement.offsetTop - presenter.clientHeight / 2 + targetElement.clientHeight / 2;
+			const targetPosition = targetElement.offsetTop - presenter.clientHeight / 3 + targetElement.clientHeight / 2;
 			const startPosition = presenter.scrollTop;
 			const distance = targetPosition - startPosition;
-			const duration = 2000; // Increase duration to 2000ms (2 seconds) for a slower scroll
+			const duration = 2000; // Duration of the scroll in milliseconds
 			let startTime = null;
 
 			function easeOutQuad(t) {
