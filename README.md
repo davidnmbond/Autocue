@@ -1,3 +1,5 @@
+NOTE! Use the Chrome browser for the voice recognition feature
+
 * The App: https://davidnmbond.github.io/Autocue/
 * Demo video: https://youtu.be/bWheWBxE33I
 * Source code: https://github.com/davidnmbond/Autocue
