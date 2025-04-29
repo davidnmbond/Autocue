@@ -75,12 +75,16 @@
 			--toolbar-bg: #f0f0f0;
 			--text-color: #000;
 			--bg-color: #fff;
+			--divider-color: #ddd;
+			/* Light mode divider */
 		}
 
 		body.dark {
 			--toolbar-bg: #333;
 			--text-color: #fff;
 			--bg-color: #000;
+			--divider-color: #555;
+			/* Dark mode divider */
 		}
 
 		#presenter {
@@ -140,6 +144,22 @@
 			/* Reduced paragraph spacing from 0.75em to 0.375em */
 		}
 
+		#presenter {
+			transition: transform 0.5s ease;
+		}
+
+		#presenter.reverse {
+			transform: scaleX(-1);
+		}
+
+		#presenter.rotate {
+			transform: rotate(180deg);
+		}
+
+		#presenter.reverse.rotate {
+			transform: scaleX(-1) rotate(180deg);
+		}
+
 		.dim {
 			opacity: 0.3;
 		}
@@ -153,6 +173,33 @@
 		body.dark #editor {
 			background: var(--bg-color);
 			color: var(--text-color);
+		}
+
+		body.dark select {
+			background-color: #444;
+			color: var(--text-color);
+			border: 1px solid var(--divider-color);
+			padding: 2px 4px;
+		}
+
+		body.dark option {
+			background-color: #444;
+			color: var(--text-color);
+		}
+
+		/* Style toggle switch slider in dark mode */
+		body.dark .toggle-switch .slider {
+			background-color: #666;
+		}
+
+		body.dark .toggle-switch input:checked+.slider {
+			background-color: #2196F3;
+		}
+
+		/* Example: style other parts if needed */
+		body.dark select:focus {
+			outline: none;
+			box-shadow: 0 0 3px var(--divider-color);
 		}
 
 		#vuMeterContainer {
@@ -268,11 +315,34 @@
 			/* Slightly smaller font size */
 		}
 
-		#toolbar span {
+		#toolbar {
+			display: flex;
+			align-items: center;
+			padding: 5px 10px;
+		}
+
+		#toolbar-left * {
+			display: flex;
+			align-items: center;
+			gap: 10px;
 			color: var(--text-color);
-			/* Ensure toolbar text contrasts with the background */
-			font-size: 0.9em;
-			margin-left: 5px;
+		}
+
+		/* This pushes the Present button to the right */
+		#toolbar button {
+			margin-left: auto;
+		}
+
+		/* Add subtle dividers between each toolbar control */
+		#toolbar>div>* {
+			border-right: 1px solid var(--divider-color);
+			padding-right: 8px;
+			margin-right: 8px;
+		}
+
+		#toolbar>div>*:last-child {
+			border-right: none;
+			margin-right: 0;
 		}
 
 		body.presentation {
@@ -340,38 +410,52 @@
 
 <body>
 	<div id="toolbar">
-		<span id="voiceStatus"></span>
-		<div>
-			<select id="fontSize">
-				<option value="20px">Small</option>
-				<option value="24px" selected>Medium</option>
-				<option value="30px">Large</option>
-				<option value="36px">Extra Large</option>
-				<option value="42px">Huge</option>
-			</select>
-			<select id="wordSeekRange">
-				<option value="3">3 Words</option>
-				<option value="5" selected>5 Words</option>
-				<option value="7">7 Words</option>
-				<option value="10">10 Words</option>
-			</select>
-			<select id="presenterWidth">
-				<option value="100%" selected>100%</option>
-				<option value="80%">80%</option>
-				<option value="50%">50%</option>
-			</select>
-			<label class="toggle-switch">
-				<input type="checkbox" id="dictationToggle">
-				<span class="slider"></span>
-			</label>
-			<span>Dictation</span>
-			<label class="toggle-switch">
-				<input type="checkbox" id="vuMeterToggle" checked>
-				<span class="slider"></span>
-			</label>
-			<span>VU Meter</span>
+		<div id="toolbar-left">
+			<div>
+				<select id="fontSize">
+					<option value="20px">Small</option>
+					<option value="24px" selected>Medium</option>
+					<option value="30px">Large</option>
+					<option value="36px">Extra Large</option>
+					<option value="42px">Huge</option>
+				</select>
+				<select id="wordSeekRange">
+					<option value="3">3 Words</option>
+					<option value="5" selected>5 Words</option>
+					<option value="7">7 Words</option>
+					<option value="10">10 Words</option>
+				</select>
+				<select id="presenterWidth">
+					<option value="100%" selected>100%</option>
+					<option value="80%">80%</option>
+					<option value="50%">50%</option>
+				</select>
+				<label class="toggle-switch">
+					<input type="checkbox" id="dictationToggle">
+					<span class="slider"></span>
+				</label>
+				<span>Dictation</span>
+				<label class="toggle-switch">
+					<input type="checkbox" id="vuMeterToggle" checked>
+					<span class="slider"></span>
+				</label>
+				<span>VU Meter</span>
+				<label class="toggle-switch">
+					<input type="checkbox" id="rotateToggle">
+					<span class="slider"></span>
+				</label>
+				<span>Rotate</span>
+				<label class="toggle-switch">
+					<input type="checkbox" id="reverseToggle">
+					<span class="slider"></span>
+				</label>
+				<span>Reverse</span>
+			</div>
 		</div>
-		<button onclick="enterPresenter()">Present</button>
+		<div>
+			<span id="voiceStatus"></span>
+			<button onclick="enterPresenter()">Present</button>
+		</div>
 	</div>
 	<div id="vuMeterContainer">
 		<div id="vuMeter"></div>
@@ -406,6 +490,23 @@
 		let cursor = 0; // Global cursor variable
 		let words = []; // Global words array
 		let mode = 'edit'; // Default mode is 'edit'
+
+		// Place these lines inside your <script> block, after the presenter variable is defined
+		document.getElementById('reverseToggle').addEventListener('change', function () {
+			if (this.checked) {
+				presenter.classList.add('reverse');
+			} else {
+				presenter.classList.remove('reverse');
+			}
+		});
+
+		document.getElementById('rotateToggle').addEventListener('change', function () {
+			if (this.checked) {
+				presenter.classList.add('rotate');
+			} else {
+				presenter.classList.remove('rotate');
+			}
+		});
 
 		function getAudioContext() {
 			if (!audioContext) {
@@ -1212,6 +1313,14 @@ Now you're ready to practice your delivery, tweak the settings to your liking, a
 			}
 
 			requestAnimationFrame(scrollStep);
+		}
+
+		function toggleReverse() {
+			presenter.classList.toggle('reverse');
+		}
+
+		function toggleRotate() {
+			presenter.classList.toggle('rotate');
 		}
 	</script>
 </body>
