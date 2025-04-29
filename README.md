@@ -1,3 +1,27 @@
+NOTE! Use the Chrome browser for the voice recognition feature
+
+* The App: https://davidnmbond.github.io/Autocue/
+* Demo video: https://youtu.be/bWheWBxE33I
+* Source code: https://github.com/davidnmbond/Autocue
+
+It's free and open source (MIT licence)
+
+I hope it's useful to someone!  It's all fully open source (MIT licensed, so free for professional use), and easy to access.  There's no server, so you can just save the page as HTML and use it in the field.
+It needs the Chrome browser for the voice recognition, and/or you can operate using keys:
+
+* Ctrl+Enter: Presentation mode (from where you were editing)
+* Esc: Back to edit mode
+* Home/End: Start/End of script
+* Left/Right: Word backwards/forwards
+* Up/Down: Line backwards/forwards
+* Page Up/Down: Story backwards/forwards
+
+Use the standard browser controls:
+* Start/Stop Full Screen: F11
+* Zoom: Ctrl+/- or Ctrl+Scrollwheel
+
+Enjoy!
+
 ```
 #Introduction
 
